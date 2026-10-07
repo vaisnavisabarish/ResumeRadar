@@ -65,6 +65,15 @@ app.post('/api/verify', async (req, res) => {
         });
 
     } catch (error) {
+        if (error.name === 'GitHubVerificationError') {
+            console.error('GitHub verification error:', { code: error.code, ...error.diagnostics });
+            return res.status(error.status).json({
+                success: false,
+                error: error.message,
+                code: error.code,
+                diagnostics: error.diagnostics,
+            });
+        }
         console.error("Server Error:", error.message);
         res.status(500).json({ error: error.message });
     }

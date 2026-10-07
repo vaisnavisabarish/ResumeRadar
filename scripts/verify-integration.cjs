@@ -37,7 +37,7 @@ function syntheticPdf() {
 function loadModule(file, requireModule, extra = {}) {
   const module = { exports: {} };
   const execute = new Function('require', 'module', 'exports', '__dirname', 'console', 'process', fs.readFileSync(file, 'utf8'));
-  execute(requireModule, module, module.exports, extra.__dirname || path.dirname(file), quietConsole, extra.process || { env: {} });
+  execute(requireModule, module, module.exports, extra.__dirname || path.dirname(file), extra.console || quietConsole, extra.process || { env: {} });
   return module.exports;
 }
 
@@ -105,7 +105,143 @@ class CDP {
   }
 }
 
-async function browserChecks(verification, pdf, temporaryDirectory, countCandidates) {
+async function githubRegressionChecks(database, query) {
+  const expectedUrl = 'https://api.github.com/users/octocat/repos?per_page=100&sort=pushed&direction=desc';
+  const repositories = [
+    { name: 'react-app', html_url: 'https://github.com/octocat/react-app' },
+    { name: 'eye-model', html_url: 'https://github.com/octocat/eye-model' },
+    { name: 'express-api', html_url: 'https://github.com/octocat/express-api' },
+  ];
+  const expectedEvidence = [
+    { id: 1, skill: 'React & Frontend Architecture', score: 95, status: 'Verified', sources: 1, repos: [{ name: 'react-app', url: repositories[0].html_url }] },
+    { id: 2, skill: 'Python & AI/ML Models', score: 90, status: 'Verified', sources: 1, repos: [{ name: 'eye-model', url: repositories[1].html_url }] },
+    { id: 3, skill: 'Node.js & Backend APIs', score: 85, status: 'Verified', sources: 1, repos: [{ name: 'express-api', url: repositories[2].html_url }] },
+    { id: 4, skill: 'Docker & Containerization', score: 15, status: 'Missing Evidence', sources: 0, repos: [] },
+  ];
+  let scenario = { data: repositories };
+  const requests = [];
+  const fakeToken = 'mock-only-github-secret';
+  const environment = {};
+  const helper = loadModule(path.join(verificationDirectory, 'githubVerifier.js'), name => {
+    assert.equal(name, 'axios');
+    return { get: async (url, config) => {
+      requests.push({ url, timeout: config.timeout, authenticated: Boolean(config.headers?.Authorization) });
+      if (scenario.error) throw scenario.error;
+      return { data: scenario.data };
+    } };
+  }, { process: { env: environment } });
+  let writes = 0;
+  const logs = [];
+  const app = loadApp(path.join(verificationDirectory, 'server.js'), name => {
+    if (name === './database') return {
+      all: database.all.bind(database),
+      run(...args) { writes++; return database.run(...args); },
+    };
+    if (name === './githubVerifier') return helper;
+    if (name === './linkedinVerifier') return { verifyLinkedInEvidence: async () => null };
+    if (name === 'dotenv') return { config() {} };
+    return verificationRequire(name);
+  }, { process: { env: {} }, console: { ...quietConsole, error: (...args) => logs.push(args) } });
+  const verification = await listen(app);
+  const counts = async () => ({
+    candidates: (await query('SELECT count(*) AS count FROM candidates'))[0].count,
+    evidence: (await query('SELECT count(*) AS count FROM verification_results'))[0].count,
+  });
+  const payload = url => ({ candidate: { name: 'GitHub Regression Candidate', profile_links: { github: url } }, skills: {}, projects: [] });
+  try {
+    for (const url of [
+      'https://github.com/octocat', 'https://github.com/octocat/',
+      'https://github.com/octocat?utm_source=chatgpt.com', 'https://github.com/octocat#section',
+      'https://www.github.com/octocat',
+    ]) {
+      const evidence = await helper.verifyGitHubEvidence(url, {}, []);
+      assert.deepEqual(evidence, expectedEvidence, 'Successful evidence generation must remain unchanged');
+      const api = new URL(requests.at(-1).url);
+      assert.equal(api.pathname.split('/')[2], 'octocat');
+      assert.equal(api.pathname, '/users/octocat/repos');
+      assert.equal(requests.at(-1).url, expectedUrl);
+      assert.equal(requests.at(-1).timeout, 5000);
+      assert.equal(requests.at(-1).authenticated, false, 'Public profiles must work without a token');
+      const result = await request(verification.url, '/api/verify', payload(url));
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body.evidence, expectedEvidence);
+      assert.equal(requests.at(-1).url, expectedUrl);
+    }
+    console.log('PASS GitHub profile URLs: clean, trailing slash, query, fragment, www; exact octocat API path; unchanged evidence; token optional');
+
+    const upstreamError = status => Object.assign(new Error('Unsafe raw Axios message: ' + fakeToken), {
+      code: 'ERR_BAD_REQUEST',
+      config: { headers: { Authorization: 'token ' + fakeToken } },
+      request: { headers: { Authorization: 'token ' + fakeToken } },
+      response: {
+        status,
+        data: { message: `Mock GitHub status ${status}. Credential ${fakeToken}. Authorization: Bearer other-secret. ghp_AnotherSecret123` },
+        headers: { 'x-ratelimit-limit': '60', 'x-ratelimit-remaining': '0', 'x-ratelimit-reset': '1900000000', 'retry-after': '30', authorization: 'token ' + fakeToken },
+      },
+    });
+    environment.GITHUB_TOKEN = fakeToken; // Synthetic credential; never load the user's environment.
+    const failures = [
+      ...['https://example.com/octocat', 'https://github.com.evil.example/octocat',
+        'https://github.com/octocat/Hello-World', 'not a URL', 'https://',
+        'https:github.com/octocat', 'https:/github.com/octocat', 'https:///github.com/octocat',
+        'https://user:password@github.com/octocat', 'ftp://github.com/octocat', null,
+      ].map(url => ({ label: 'invalid URL', url, code: 'GITHUB_INVALID_URL', status: 400, message: /Invalid GitHub URL/, noRequest: true })),
+      { label: 'unexpected response object', data: { login: 'octocat' }, code: 'GITHUB_UNEXPECTED_RESPONSE', status: 502, message: /unexpected response shape/ },
+      { label: '401', error: upstreamError(401), code: 'GITHUB_AUTHENTICATION_FAILED', status: 502, upstreamStatus: 401, message: /authentication failed/ },
+      { label: '403', error: upstreamError(403), code: 'GITHUB_RATE_LIMITED_OR_FORBIDDEN', status: 503, upstreamStatus: 403, message: /rate limiting or access forbidden/ },
+      { label: '404', error: upstreamError(404), code: 'GITHUB_PROFILE_NOT_FOUND', status: 404, upstreamStatus: 404, message: /profile not found/ },
+      { label: '429', error: upstreamError(429), code: 'GITHUB_RATE_LIMITED_OR_FORBIDDEN', status: 503, upstreamStatus: 429, message: /rate limiting or access forbidden/ },
+      { label: 'network error', error: Object.assign(new Error('Unsafe network details ' + fakeToken), { code: 'ENOTFOUND' }), code: 'GITHUB_REQUEST_FAILED', status: 502, message: /network request failed/ },
+      { label: 'timeout', error: Object.assign(new Error('Unsafe timeout details ' + fakeToken), { code: 'ECONNABORTED' }), code: 'GITHUB_TIMEOUT', status: 504, message: /timed out/ },
+    ];
+    for (const failure of failures) {
+      scenario = failure;
+      const url = Object.hasOwn(failure, 'url') ? failure.url : 'https://github.com/octocat';
+      const before = await counts();
+      const previousWrites = writes;
+      const previousRequests = requests.length;
+      await assert.rejects(helper.verifyGitHubEvidence(url, {}, []), error => {
+        assert.equal(error.code, failure.code);
+        assert.match(error.message, failure.message);
+        assert.equal(error.status, failure.status);
+        return true;
+      });
+      // Missing URLs use the route's existing validation; all other cases use the helper.
+      const result = await request(verification.url, '/api/verify', payload(url));
+      assert.equal(result.status, failure.status, failure.label);
+      if (url !== null) {
+        assert.equal(result.body.success, false);
+        assert.equal(result.body.code, failure.code);
+        assert.match(result.body.error, failure.message);
+        if (failure.upstreamStatus) {
+          assert.equal(result.body.diagnostics.upstreamStatus, failure.upstreamStatus);
+          assert.match(result.body.diagnostics.upstreamMessage, /Mock GitHub status/);
+          assert.equal(result.body.diagnostics.networkCode, 'ERR_BAD_REQUEST');
+          assert.deepEqual(result.body.diagnostics.rateLimit, { limit: 60, remaining: 0, reset: 1900000000, retryAfter: 30 });
+        }
+        if (failure.error && !failure.upstreamStatus) assert.equal(result.body.diagnostics.networkCode, failure.error.code);
+      }
+      if (failure.noRequest) assert.equal(requests.length, previousRequests, 'Invalid URL must not contact GitHub');
+      assert.equal(writes, previousWrites, 'Failed verification must not attempt database writes');
+      assert.deepEqual(await counts(), before, 'Failed verification must not persist a candidate or evidence');
+      const serialized = JSON.stringify({ response: result.body, logs });
+      for (const secret of [fakeToken, 'other-secret', 'ghp_AnotherSecret123', 'Authorization', 'Unsafe raw Axios', 'Unsafe network', 'Unsafe timeout']) {
+        assert.ok(!serialized.includes(secret), 'Diagnostics must exclude credentials and raw errors');
+      }
+      console.log('PASS GitHub failure: ' + failure.label + '; safe diagnostics; zero database writes');
+    }
+    scenario = { data: [] };
+    const emptyEvidence = await helper.verifyGitHubEvidence('https://github.com/octocat', {}, []);
+    assert.ok(emptyEvidence.every(item => item.sources === 0 && item.repos.length === 0));
+    assert.equal(requests.at(-1).authenticated, true, 'Configured credentials remain supported');
+    console.log('PASS GitHub empty repository array: no invented sources; optional configured credential supported');
+  } finally {
+    verification.server.closeAllConnections();
+    await new Promise(resolve => verification.server.close(resolve));
+  }
+}
+
+async function browserChecks(verification, pdf, frontend, temporaryDirectory, countCandidates) {
   const browserPath = [
     'C:/Program Files/Google/Chrome/Application/chrome.exe',
     'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
@@ -148,7 +284,7 @@ async function browserChecks(verification, pdf, temporaryDirectory, countCandida
       }
       throw new Error('Browser timeout: ' + label + '\n' + await cdp.evaluate('document.body.innerText'));
     };
-    await cdp.send('Page.navigate', { url: 'http://localhost:5173/' });
+    await cdp.send('Page.navigate', { url: frontend });
     console.log('Browser: checking Upload page');
     await until('!!document.querySelector("input[type=file]")', 'Upload page');
     const fixture = path.join(temporaryDirectory, 'integration.pdf');
@@ -216,6 +352,7 @@ async function main() {
   }, { process: { env: environment } });
   const verification = await listen(app);
   let pdf;
+  let frontend;
   try {
     assert.equal((await request(verification.url, '/api/candidates')).body.candidates.length, 0);
     assert.equal((await request(verification.url, '/api/role-analysis')).status, 404);
@@ -244,17 +381,24 @@ async function main() {
     assert.equal(pythonArguments.argumentsList[1], 'role " & echo unsafe');
     console.log('PASS isolated HTTP: existing SQLite schema; empty states; request validation; persistence complete before response; stored evidence; Gemini success/fallback/missing-key; shell-free Python arguments');
 
-    const githubFile = path.join(verificationDirectory, 'githubVerifier.js');
-    const githubEmpty = loadModule(githubFile, () => ({ get: async () => ({ data: [] }) }));
-    const emptyEvidence = await githubEmpty.verifyGitHubEvidence('https://github.com/test', {}, []);
-    assert.ok(emptyEvidence.every(item => item.sources === 0 && item.repos.length === 0));
-    const githubFailed = loadModule(githubFile, () => ({ get: async () => { throw new Error('Mock network failure'); } }));
-    await assert.rejects(githubFailed.verifyGitHubEvidence('https://github.com/test', {}, []), /GitHub verification failed/);
-    console.log('PASS GitHub helper: missing matches have no invented sources; outage produces an error');
+    await githubRegressionChecks(database, query);
 
-    const pythonOutput = execFileSync('python', ['-B', path.join(verificationDirectory, 'semanticMatcher.py'), 'Data Scientist'], { cwd: verificationDirectory, encoding: 'utf8' });
+    // Execute the existing matcher against in-memory SQLite, never the user's database.
+    const pythonTest = [
+      'import json, runpy, sqlite3, sys, types',
+      'namespace = runpy.run_path(sys.argv[1])',
+      'connection = sqlite3.connect(":memory:")',
+      'connection.execute("CREATE TABLE candidates (id INTEGER, created_at TEXT, skills_json TEXT, projects_json TEXT)")',
+      'connection.execute("INSERT INTO candidates VALUES (1, ?, ?, ?)", ("2026-01-01", json.dumps({"technical": ["Python"]}), "[]"))',
+      'namespace["compare_candidate_with_job"].__globals__["sqlite3"] = types.SimpleNamespace(connect=lambda _: connection)',
+      'real_path = namespace["os"].path',
+      'namespace["compare_candidate_with_job"].__globals__["os"] = types.SimpleNamespace(path=types.SimpleNamespace(join=real_path.join, dirname=real_path.dirname, exists=lambda _: True))',
+      'sys.argv = [sys.argv[1], "Data Scientist"]',
+      'namespace["compare_candidate_with_job"]()',
+    ].join('\n');
+    const pythonOutput = execFileSync('python', ['-B', '-c', pythonTest, path.join(verificationDirectory, 'semanticMatcher.py')], { cwd: verificationDirectory, encoding: 'utf8' });
     assert.equal(JSON.parse(pythonOutput).method, 'weighted keyword matching');
-    console.log('PASS relocated Python: real local database read; weighted keyword result');
+    console.log('PASS relocated Python: in-memory database; weighted keyword result');
 
     const pdfApp = loadApp(path.join(pdfDirectory, 'server.js'), pdfRequire, { __dirname: temporaryDirectory });
     pdf = await listen(pdfApp);
@@ -265,8 +409,17 @@ async function main() {
     assert.equal(invalid.status, 400);
     assert.equal((await invalid.json()).success, false);
     console.log('PASS PDF HTTP: health; missing-file validation; invalid-file JSON error; uploads path created beside relocated server');
-    await browserChecks(verification.url, pdf.url, temporaryDirectory, countCandidates);
+    // Serve the existing frontend build on a test-owned port; no running app required.
+    const express = verificationRequire('express');
+    const frontendApp = express();
+    const frontendDirectory = path.join(root, 'frontend/dist');
+    assert.ok(fs.existsSync(path.join(frontendDirectory, 'index.html')), 'Run the existing frontend build before integration tests');
+    frontendApp.use(express.static(frontendDirectory));
+    frontendApp.use((_req, res) => res.sendFile(path.join(frontendDirectory, 'index.html')));
+    frontend = await listen(frontendApp);
+    await browserChecks(verification.url, pdf.url, frontend.url, temporaryDirectory, countCandidates);
   } finally {
+    if (frontend) { frontend.server.closeAllConnections(); await new Promise(resolve => frontend.server.close(resolve)); }
     if (pdf) { pdf.server.closeAllConnections(); await new Promise(resolve => pdf.server.close(resolve)); }
     verification.server.closeAllConnections();
     await new Promise(resolve => verification.server.close(resolve));
