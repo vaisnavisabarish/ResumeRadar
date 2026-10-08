@@ -151,89 +151,7 @@ function extractEducation(text) {
     };
 
 }
-function extractProjects(text) {
 
-    const match = text.match(
-        /PROJECTS([\s\S]*?)(EXPERIENCE|EDUCATION|CERTIFICATIONS|PUBLICATIONS|$)/i
-    );
-
-
-    if (!match) {
-        return [];
-    }
-
-
-    const section = match[1];
-
-
-    const blocks = section.split(/\n(?=[A-Z][A-Za-z ]+\n)/);
-
-
-    const projects = [];
-
-
-    blocks.forEach(block => {
-
-        const lines = block
-            .split("\n")
-            .map(line => line.trim())
-            .filter(line =>
-                line &&
-                !line.startsWith("--")
-            );
-
-
-        if(lines.length === 0){
-            return;
-        }
-
-
-        const title = lines[0];
-
-
-        // Ignore non-project lines
-        if(
-            title.length > 60 ||
-            title.includes(":") ||
-            title.includes(",")
-        ){
-            return;
-        }
-
-
-        const techLine = block.match(
-            /Technologies used:\s*([\s\S]*?)(Features|$)/i
-        );
-
-
-        let technologies=[];
-
-
-        if(techLine){
-
-            technologies = techLine[1]
-                .split(",")
-                .map(t=>t.trim())
-                .filter(Boolean);
-
-        }
-
-
-        projects.push({
-
-            title,
-
-            technologies
-
-        });
-
-
-    });
-
-
-    return projects;
-
-}
 function extractExperience(text) {
 
     const match = text.match(
@@ -279,8 +197,11 @@ function extractExperience(text) {
 }
 function extractResearch(text) {
 
+
     const match = text.match(
-        /PUBLICATIONS([\s\S]*?)(CERTIFICATIONS|ACHIEVEMENTS|PROJECTS|EXPERIENCE|$)/i
+
+        /(PUBLICATIONS?|RESEARCH(?:\s+PAPERS)?|RESEARCH\s+WORK|RESEARCH\s+EXPERIENCE)([\s\S]*?)(PROJECTS|EXPERIENCE|WORK EXPERIENCE|EDUCATION|SKILLS|CERTIFICATIONS|ACHIEVEMENTS|EXTRACURRICULARS|POSITIONS OF RESPONSIBILITY|$)/i
+
     );
 
 
@@ -289,51 +210,254 @@ function extractResearch(text) {
     }
 
 
-    const lines = match[1]
+    const section = match[2];
+
+
+    const lines = section
+
         .split("\n")
-        .map(line => line.trim())
+
+        .map(line =>
+            line
+                .replace(/^[-•*]\s*/, "")
+                .trim()
+        )
+
         .filter(line =>
             line &&
             !line.startsWith("--")
         );
 
 
-    if (lines.length < 2) {
+    if (lines.length === 0) {
         return [];
     }
 
 
-    const title = lines[0]
-        .replace(/["']/g, "")
-        .trim();
+
+    const research = [];
 
 
-    const publicationText = lines[1];
+    let current = {
+
+        title: "",
+        journal: "",
+        year: null
+
+    };
 
 
-    // Extract year
-    const yearMatch = publicationText.match(/\b(19|20)\d{2}\b/);
 
-    const year = yearMatch 
-        ? yearMatch[0] 
-        : null;
+    lines.forEach(line => {
 
 
-    // Clean journal name
-    const journal = publicationText
-        .replace(/Published in/i, "")
-        .replace(/\b(19|20)\d{2}\b/, "")
-        .replace(/^[,\s]+|[,\s]+$/g, "")
-        .trim();
+        const yearMatch = line.match(/\b(19|20)\d{2}\b/);
 
 
-    return [
-        {
-            title,
-            journal,
-            year
+        if (yearMatch) {
+
+            current.year = yearMatch[0];
+
         }
+
+
+
+        if (
+            !current.title &&
+            !/^(authors?|published|doi|journal)/i.test(line)
+        ) {
+
+            current.title = line
+                .replace(/["']/g, "")
+                .trim();
+
+            return;
+
+        }
+
+
+
+        if (
+
+            !current.journal &&
+            (
+                /published/i.test(line) ||
+                /journal/i.test(line) ||
+                /conference/i.test(line) ||
+                /ieee/i.test(line) ||
+                /acm/i.test(line) ||
+                /springer/i.test(line) ||
+                /elsevier/i.test(line)
+            )
+
+        ) {
+
+
+            current.journal = line
+
+                .replace(/published in/i, "")
+
+                .replace(/\b(19|20)\d{2}\b/, "")
+
+                .replace(/[.,]+$/, "")
+
+                .trim();
+
+
+        }
+
+
+
+    });
+
+
+
+    if (current.title) {
+
+        research.push(current);
+
+    }
+
+
+
+    return research;
+
+}
+function extractProjects(text) {
+
+    const match = text.match(
+        /PROJECTS?([\s\S]*?)(EXPERIENCE|WORK EXPERIENCE|EDUCATION|CERTIFICATIONS|PUBLICATIONS|EXTRACURRICULARS|ACHIEVEMENTS|POSITIONS OF RESPONSIBILITY|$)/i
+    );
+
+
+    if (!match) {
+        return [];
+    }
+
+
+    const section = match[1];
+
+
+    const blocks = section.split(
+        /\n(?=[A-Z][A-Za-z0-9\s&()\/-]{3,80}\n)/
+    );
+
+
+    const techDictionary = [
+
+        "Python",
+        "Java",
+        "C++",
+        "C",
+        "JavaScript",
+        "TypeScript",
+
+        "React",
+        "Next.js",
+        "Node.js",
+        "Express.js",
+        "Tailwind CSS",
+
+        "HTML",
+        "CSS",
+
+        "SQL",
+        "SQLite",
+        "PostgreSQL",
+        "MongoDB",
+        "Firebase",
+        "Prisma",
+
+        "FastAPI",
+        "Flask",
+        "Django",
+
+        "PyTorch",
+        "TensorFlow",
+
+        "NumPy",
+        "Pandas",
+        "OpenCV",
+
+        "Docker",
+        "AWS",
+        "Git",
+
+        "spaCy",
+        "PyMuPDF",
+
+        "Semantic Scholar",
+        "OpenAlex",
+        "CrossRef",
+
+        "Leaflet",
+        "Shapely",
+        "GeoJSON",
+
+        "Machine Learning",
+        "Deep Learning",
+        "NLP",
+        "XGBoost",
+        "Random Forest"
     ];
+
+
+    const projects = [];
+
+
+    blocks.forEach(block => {
+
+
+        const lines = block
+            .split("\n")
+            .map(line =>
+                line
+                    .replace(/^[-•*]\s*/, "")
+                    .trim()
+            )
+            .filter(line =>
+                line &&
+                !line.startsWith("--")
+            );
+
+
+        if (lines.length === 0) {
+            return;
+        }
+
+
+        let title = lines[0];
+
+
+        // Remove unwanted headings
+        if (
+            /^(projects|project experience)$/i.test(title) ||
+            title.length > 100
+        ) {
+            return;
+        }
+
+
+        const technologies = techDictionary.filter(skill =>
+            block
+                .toLowerCase()
+                .includes(skill.toLowerCase())
+        );
+
+
+        projects.push({
+
+            title,
+
+            technologies: [...new Set(technologies)]
+
+        });
+
+
+    });
+
+
+    return projects;
 
 }
 

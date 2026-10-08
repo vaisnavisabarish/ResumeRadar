@@ -21,7 +21,8 @@ import {
   Plus,
   Calendar,
   MapPin,
-  Building
+  Building,
+  Trash2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -41,7 +42,7 @@ export default function RecruiterDashboard() {
 
   const navigate = useNavigate();
 
-  // Fetch candidates and jobs from SQLite backend on port 5001
+  // Fetch candidates and jobs from SQLite backend on port 5001[cite: 1]
   useEffect(() => {
     Promise.all([
       fetch('http://localhost:5001/api/candidates').then(res => res.json()),
@@ -140,7 +141,7 @@ export default function RecruiterDashboard() {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#FDFBF7] space-y-4">
         <Loader2 className="w-10 h-10 text-[#BB2649] animate-spin" />
-        <p className="text-[#53041B] font-semibold">Querying SQLite Database on Port 5001...</p>
+        <p className="text-[#53041B] font-semibold">Querying SQLite Database on Port 5001[cite: 1]...</p>
       </div>
     );
   }
@@ -320,7 +321,7 @@ function Header({ onMenu, onLogout }) {
             </div>
             <div className="hidden text-left sm:block">
               <p className="text-sm font-bold text-[#53041B]">Recruiter</p>
-              <p className="text-xs text-gray-500">Database Synchronized</p>
+              <p className="text-xs text-gray-500">Database Synchronized[cite: 1]</p>
             </div>
           </div>
         </div>
@@ -332,7 +333,7 @@ function Header({ onMenu, onLogout }) {
 function Dashboard({ selectedRole, setSelectedRole, search, setSearch, minimumReadiness, setMinimumReadiness, candidates, totalCount, shortlist, onCandidate, onShortlist, navigate }) {
   return (
     <>
-      <PageHeading eyebrow="Recruiter Dashboard" title="Good morning 👋" description="Review all candidates stored in your SQLite database." />
+      <PageHeading eyebrow="Recruiter Dashboard" title="Good morning 👋" description="Review all candidates stored in your SQLite database[cite: 1]." />
 
       <StatsGrid totalCount={totalCount} />
 
@@ -363,7 +364,7 @@ function Dashboard({ selectedRole, setSelectedRole, search, setSearch, minimumRe
 function CandidatesPage({ selectedRole, setSelectedRole, search, setSearch, minimumReadiness, setMinimumReadiness, candidates, shortlist, onCandidate, onShortlist }) {
   return (
     <>
-      <PageHeading eyebrow="Candidates Directory" title="All Candidates" description="Complete list of all candidate profiles loaded from SQLite database." />
+      <PageHeading eyebrow="Candidates Directory" title="All Candidates" description="Complete list of all candidate profiles loaded from SQLite database[cite: 1]." />
       <FilterBar selectedRole={selectedRole} setSelectedRole={setSelectedRole} search={search} setSearch={setSearch} minimumReadiness={minimumReadiness} setMinimumReadiness={setMinimumReadiness} />
       <div className="mt-6 flex items-center justify-between">
         <p className="text-sm text-gray-500">Showing <span className="font-bold text-gray-800">{candidates.length}</span> total candidates</p>
@@ -432,7 +433,7 @@ function JobsPage({ jobs, setJobs }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <PageHeading eyebrow="Recruiter Workspace" title="Job Postings" description="Create and manage opportunities for students in your placement pipeline." />
+        <PageHeading eyebrow="Recruiter Workspace" title="Job Postings" description="Create and manage opportunities with precise point-wise proof matrix criteria." />
         <button
           onClick={() => { setEditingJob(null); setShowForm(true); }}
           className="flex items-center justify-center gap-2 rounded-xl bg-[#53041B] hover:bg-[#770429] px-5 py-3 text-sm font-bold text-white shadow transition cursor-pointer"
@@ -443,7 +444,7 @@ function JobsPage({ jobs, setJobs }) {
       </div>
 
       <div className="text-sm text-gray-500">
-        <span className="font-bold text-gray-800">{jobs.length}</span> active job postings synchronized with SQLite.
+        <span className="font-bold text-gray-800">{jobs.length}</span> active job postings synchronized with SQLite[cite: 1].
       </div>
 
       {jobs.length > 0 ? (
@@ -574,14 +575,46 @@ function JobForm({ job, onClose, onSave }) {
     deadline: job?.deadline || "",
   });
 
+  const parsedInitialRequirements = typeof job?.requirements === 'string' 
+    ? JSON.parse(job.requirements || '[]') 
+    : (job?.requirements || [
+        { requirement: "Experience building deep learning models using PyTorch framework", evidence: "PyTorch", score: 62 },
+        { requirement: "Strong background in statistical methods and predictive modeling", evidence: "Python", score: 85 },
+        { requirement: "Familiarity with computer vision, object detection, or tracking pipelines", evidence: "OpenCV / MediaPipe", score: 62 },
+        { requirement: "Database management proficiency with PostgreSQL and data querying", evidence: "SQL", score: 85 }
+      ]);
+
+  const [requirements, setRequirements] = useState(parsedInitialRequirements);
+  const [currentReq, setCurrentReq] = useState({
+    requirement: "",
+    evidence: "",
+    score: 75
+  });
+
   function update(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function handleAddRequirement(e) {
+    e.preventDefault();
+    if (!currentReq.requirement.trim()) return;
+    setRequirements([...requirements, { ...currentReq, score: Number(currentReq.score) }]);
+    setCurrentReq({ requirement: "", evidence: "", score: 75 });
+  }
+
+  function handleRemoveRequirement(index) {
+    setRequirements(requirements.filter((_, i) => i !== index));
   }
 
   function submit(event) {
     event.preventDefault();
     const skills = form.skills.split(",").map((s) => s.trim()).filter(Boolean);
-    onSave({ ...form, readiness: Number(form.readiness), skills });
+    onSave({ 
+      ...form, 
+      readiness: Number(form.readiness), 
+      skills, 
+      requirements 
+    });
   }
 
   return (
@@ -590,7 +623,7 @@ function JobForm({ job, onClose, onSave }) {
         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#BB2649]">Recruiter Workspace</p>
-            <h2 className="text-xl font-bold text-[#53041B]">{job ? "Edit Job" : "Post a New Job"}</h2>
+            <h2 className="text-xl font-bold text-[#53041B]">{job ? "Edit Job & Proof Matrix" : "Post a New Job & Proof Matrix"}</h2>
           </div>
           <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 cursor-pointer"><X size={20} /></button>
         </div>
@@ -615,9 +648,80 @@ function JobForm({ job, onClose, onSave }) {
 
           <FormField label="Required Skills" value={form.skills} onChange={(v) => update("skills", v)} placeholder="Python, SQL, Machine Learning, AWS" hint="Separate skills with commas." required />
 
+          {/* Point-wise Proof Matrix Criteria Manager */}
+          <div className="space-y-3 pt-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
+              Proof Matrix Criteria ({requirements.length})
+            </label>
+            <p className="text-[11px] text-gray-500">Define specific job requirements and expected candidate resume evidence points.</p>
+            
+            <div className="space-y-2.5 max-h-52 overflow-y-auto pr-1">
+              {requirements.map((item, index) => (
+                <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#FDFBF7] border border-gray-200 p-3.5 rounded-xl text-sm">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-gray-900 font-semibold">{index + 1}. {item.requirement}</p>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span>Expected Evidence: <strong className="text-[#53041B]">{item.evidence || 'N/A'}</strong></span>
+                      <span>Target Score: <strong className="text-[#BB2649]">{item.score}%</strong></span>
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveRequirement(index)}
+                    className="text-red-500 hover:text-red-700 p-1.5 cursor-pointer shrink-0 self-end sm:self-center"
+                    title="Remove Criterion"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Input fields for new point-wise criteria */}
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3 mt-3">
+              <p className="text-xs font-bold text-[#53041B] uppercase tracking-wider">Add New Requirement Criterion</p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <input 
+                  type="text" 
+                  value={currentReq.requirement} 
+                  onChange={(e) => setCurrentReq({ ...currentReq, requirement: e.target.value })} 
+                  placeholder="Job Requirement e.g. Experience with AWS cloud pipelines" 
+                  className="sm:col-span-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs outline-none focus:border-[#BB2649]"
+                />
+                <input 
+                  type="text" 
+                  value={currentReq.evidence} 
+                  onChange={(e) => setCurrentReq({ ...currentReq, evidence: e.target.value })} 
+                  placeholder="Expected Keyword / Evidence" 
+                  className="rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs outline-none focus:border-[#BB2649]"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-600 font-medium">Match Score (%):</span>
+                  <input 
+                    type="number" 
+                    min="0" 
+                    max="100" 
+                    value={currentReq.score} 
+                    onChange={(e) => setCurrentReq({ ...currentReq, score: e.target.value })} 
+                    className="w-20 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-[#BB2649]"
+                  />
+                </div>
+                <button 
+                  type="button" 
+                  onClick={handleAddRequirement} 
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#770429] hover:bg-[#53041B] text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer"
+                >
+                  <Plus size={15} /> Add Point Criterion
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-700">Job Description</label>
-            <textarea value={form.description} onChange={(e) => update("description", e.target.value)} placeholder="Describe responsibilities..." rows={4} required className="w-full resize-none rounded-xl border border-gray-200 bg-[#FDFBF7] px-4 py-3 text-sm outline-none focus:border-[#BB2649]" />
+            <textarea value={form.description} onChange={(e) => update("description", e.target.value)} placeholder="Describe responsibilities..." rows={3} required className="w-full resize-none rounded-xl border border-gray-200 bg-[#FDFBF7] px-4 py-3 text-sm outline-none focus:border-[#BB2649]" />
           </div>
 
           <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
@@ -642,6 +746,13 @@ function FormField({ label, value, onChange, placeholder, type = "text", min, ma
 
 function JobDetails({ job, onClose, onEdit, onDelete }) {
   const skillsList = typeof job.skills === 'string' ? JSON.parse(job.skills || '[]') : (job.skills || []);
+  
+  let requirementsList = [];
+  try {
+    requirementsList = typeof job.requirements === 'string' ? JSON.parse(job.requirements || '[]') : (job.requirements || []);
+  } catch (e) {
+    requirementsList = [];
+  }
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4">
@@ -669,6 +780,22 @@ function JobDetails({ job, onClose, onEdit, onDelete }) {
               ))}
             </div>
           </div>
+
+          {requirementsList.length > 0 && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#BB2649] mb-2">Requirement vs. Proof Matrix Criteria</p>
+              <div className="space-y-2 bg-[#FDFBF7] p-3.5 rounded-xl border border-gray-200">
+                {requirementsList.map((req, idx) => (
+                  <div key={idx} className="text-xs border-b border-gray-100 last:border-0 pb-2 last:pb-0 space-y-1">
+                    <p className="font-bold text-gray-900">{idx + 1}. {typeof req === 'string' ? req : req.requirement}</p>
+                    {typeof req === 'object' && (
+                      <p className="text-gray-500 pl-3">Evidence: <span className="text-[#53041B] font-semibold">{req.evidence}</span> | Target Score: <span className="text-[#BB2649] font-semibold">{req.score}%</span></p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#BB2649]">Job Description</p>
@@ -757,7 +884,7 @@ function SectionHeading({ eyebrow, title, action }) {
 
 function StatsGrid({ totalCount }) {
   const items = [
-    { title: "Total Candidates in DB", value: totalCount, icon: Users, detail: "Full database records" },
+    { title: "Total Candidates in DB", value: totalCount, icon: Users, detail: "Full database records[cite: 1]" },
     { title: "Profile Completed", value: `${Math.min(100, totalCount * 25)}%`, icon: Users, detail: "Verified status" },
     { title: "Job Ready", value: "85%", icon: Target, detail: "High threshold match" },
     { title: "High Potential", value: totalCount > 0 ? totalCount : 1, icon: Zap, detail: "Strong role-fit" },
@@ -913,7 +1040,7 @@ function SkillLandscape() {
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#BB2649]">Skill Landscape</p>
         <h2 className="mt-1 text-xl font-bold text-[#53041B]">Student Skill Supply</h2>
-        <p className="text-xs text-gray-500">Live aggregated statistics from SQLite database.</p>
+        <p className="text-xs text-gray-500">Live aggregated statistics from SQLite database[cite: 1].</p>
       </div>
       <div className="space-y-4 pt-2">
         {[{ name: "Python", count: 145 }, { name: "React", count: 120 }, { name: "Docker", count: 75 }, { name: "Machine Learning", count: 98 }].map((skill) => (
@@ -961,7 +1088,7 @@ function EmptyState() {
   return (
     <div className="rounded-2xl border border-dashed border-[#C92D68]/30 bg-white p-10 text-center space-y-2">
       <Search size={32} className="mx-auto text-[#BB2649]" />
-      <h3 className="font-bold text-[#53041B]">No matching candidates found in SQLite</h3>
+      <h3 className="font-bold text-[#53041B]">No matching candidates found in SQLite[cite: 1]</h3>
       <p className="text-xs text-gray-500">Try lowering the readiness threshold or uploading more candidate profiles.</p>
     </div>
   );

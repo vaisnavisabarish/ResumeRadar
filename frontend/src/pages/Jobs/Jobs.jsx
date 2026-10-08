@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BriefcaseBusiness, X, Plus, Calendar, MapPin, Building, Users } from 'lucide-react';
+import { BriefcaseBusiness, X, Plus, Trash2, Calendar, MapPin, Building, Users } from 'lucide-react';
 
 export default function Jobs() {
   const [jobs, setJobs] = useState([]);
@@ -74,7 +74,7 @@ export default function Jobs() {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#BB2649]">Recruiter Workspace</p>
           <h1 className="text-3xl font-bold tracking-tight text-[#53041B]">Job Postings</h1>
-          <p className="text-sm text-gray-600">Create and manage opportunities for students in your placement pipeline.</p>
+          <p className="text-sm text-gray-600">Create and manage opportunities with precise point-wise proof matrix criteria.</p>
         </div>
 
         <button
@@ -143,7 +143,6 @@ export default function Jobs() {
 }
 
 function JobCard({ job, onView, onEdit, onDelete }) {
-  // Parse skills if stored as a JSON string
   const skillsList = typeof job.skills === 'string' ? JSON.parse(job.skills || '[]') : (job.skills || []);
 
   return (
@@ -221,14 +220,48 @@ function JobForm({ job, onClose, onSave }) {
     deadline: job?.deadline || "",
   });
 
+  // Specific point-wise proof matrix criteria
+  const parsedInitialRequirements = typeof job?.requirements === 'string' 
+    ? JSON.parse(job.requirements || '[]') 
+    : (job?.requirements || [
+        { requirement: "Experience building deep learning models using PyTorch framework", evidence: "PyTorch", score: 62 },
+        { requirement: "Strong background in statistical methods and predictive modeling", evidence: "Python", score: 85 },
+        { requirement: "Familiarity with computer vision, object detection, or tracking pipelines", evidence: "OpenCV / MediaPipe", score: 62 },
+        { requirement: "Database management proficiency with PostgreSQL and data querying", evidence: "SQL", score: 85 }
+      ]);
+
+  const [requirements, setRequirements] = useState(parsedInitialRequirements);
+
+  const [currentReq, setCurrentReq] = useState({
+    requirement: "",
+    evidence: "",
+    score: 75
+  });
+
   function update(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function handleAddRequirement(e) {
+    e.preventDefault();
+    if (!currentReq.requirement.trim()) return;
+    setRequirements([...requirements, { ...currentReq, score: Number(currentReq.score) }]);
+    setCurrentReq({ requirement: "", evidence: "", score: 75 });
+  }
+
+  function handleRemoveRequirement(index) {
+    setRequirements(requirements.filter((_, i) => i !== index));
   }
 
   function submit(event) {
     event.preventDefault();
     const skills = form.skills.split(",").map((s) => s.trim()).filter(Boolean);
-    onSave({ ...form, readiness: Number(form.readiness), skills });
+    onSave({ 
+      ...form, 
+      readiness: Number(form.readiness), 
+      skills, 
+      requirements 
+    });
   }
 
   return (
@@ -237,7 +270,7 @@ function JobForm({ job, onClose, onSave }) {
         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#BB2649]">Recruiter Workspace</p>
-            <h2 className="text-xl font-bold text-[#53041B]">{job ? "Edit Job" : "Post a New Job"}</h2>
+            <h2 className="text-xl font-bold text-[#53041B]">{job ? "Edit Job & Proof Matrix" : "Post a New Job & Proof Matrix"}</h2>
           </div>
           <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 cursor-pointer"><X size={20} /></button>
         </div>
@@ -262,9 +295,80 @@ function JobForm({ job, onClose, onSave }) {
 
           <FormField label="Required Skills" value={form.skills} onChange={(v) => update("skills", v)} placeholder="Python, SQL, Machine Learning, AWS" hint="Separate skills with commas." required />
 
+          {/* Point-wise Proof Matrix Criteria Manager */}
+          <div className="space-y-3 pt-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
+              Proof Matrix Criteria ({requirements.length})
+            </label>
+            <p className="text-[11px] text-gray-500">Define specific job requirements and expected candidate resume evidence points.</p>
+            
+            <div className="space-y-2.5 max-h-52 overflow-y-auto pr-1">
+              {requirements.map((item, index) => (
+                <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#FDFBF7] border border-gray-200 p-3.5 rounded-xl text-sm">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-gray-900 font-semibold">{index + 1}. {item.requirement}</p>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span>Expected Evidence: <strong className="text-[#53041B]">{item.evidence || 'N/A'}</strong></span>
+                      <span>Target Score: <strong className="text-[#BB2649]">{item.score}%</strong></span>
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveRequirement(index)}
+                    className="text-red-500 hover:text-red-700 p-1.5 cursor-pointer shrink-0 self-end sm:self-center"
+                    title="Remove Criterion"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Input fields for new point-wise criteria */}
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3 mt-3">
+              <p className="text-xs font-bold text-[#53041B] uppercase tracking-wider">Add New Requirement Criterion</p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <input 
+                  type="text" 
+                  value={currentReq.requirement} 
+                  onChange={(e) => setCurrentReq({ ...currentReq, requirement: e.target.value })} 
+                  placeholder="Job Requirement e.g. Experience with AWS cloud pipelines" 
+                  className="sm:col-span-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs outline-none focus:border-[#BB2649]"
+                />
+                <input 
+                  type="text" 
+                  value={currentReq.evidence} 
+                  onChange={(e) => setCurrentReq({ ...currentReq, evidence: e.target.value })} 
+                  placeholder="Expected Keyword / Evidence" 
+                  className="rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs outline-none focus:border-[#BB2649]"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-600 font-medium">Match Score (%):</span>
+                  <input 
+                    type="number" 
+                    min="0" 
+                    max="100" 
+                    value={currentReq.score} 
+                    onChange={(e) => setCurrentReq({ ...currentReq, score: e.target.value })} 
+                    className="w-20 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-[#BB2649]"
+                  />
+                </div>
+                <button 
+                  type="button" 
+                  onClick={handleAddRequirement} 
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#770429] hover:bg-[#53041B] text-white rounded-xl text-xs font-bold shadow-sm transition cursor-pointer"
+                >
+                  <Plus size={15} /> Add Point Criterion
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-700">Job Description</label>
-            <textarea value={form.description} onChange={(e) => update("description", e.target.value)} placeholder="Describe responsibilities..." rows={4} required className="w-full resize-none rounded-xl border border-gray-200 bg-[#FDFBF7] px-4 py-3 text-sm outline-none focus:border-[#BB2649]" />
+            <textarea value={form.description} onChange={(e) => update("description", e.target.value)} placeholder="Describe responsibilities..." rows={3} required className="w-full resize-none rounded-xl border border-gray-200 bg-[#FDFBF7] px-4 py-3 text-sm outline-none focus:border-[#BB2649]" />
           </div>
 
           <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
@@ -289,6 +393,13 @@ function FormField({ label, value, onChange, placeholder, type = "text", min, ma
 
 function JobDetails({ job, onClose, onEdit, onDelete }) {
   const skillsList = typeof job.skills === 'string' ? JSON.parse(job.skills || '[]') : (job.skills || []);
+  
+  let requirementsList = [];
+  try {
+    requirementsList = typeof job.requirements === 'string' ? JSON.parse(job.requirements || '[]') : (job.requirements || []);
+  } catch (e) {
+    requirementsList = [];
+  }
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4">
@@ -316,6 +427,22 @@ function JobDetails({ job, onClose, onEdit, onDelete }) {
               ))}
             </div>
           </div>
+
+          {requirementsList.length > 0 && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#BB2649] mb-2">Requirement vs. Proof Matrix Criteria</p>
+              <div className="space-y-2 bg-[#FDFBF7] p-3.5 rounded-xl border border-gray-200">
+                {requirementsList.map((req, idx) => (
+                  <div key={idx} className="text-xs border-b border-gray-100 last:border-0 pb-2 last:pb-0 space-y-1">
+                    <p className="font-bold text-gray-900">{idx + 1}. {typeof req === 'string' ? req : req.requirement}</p>
+                    {typeof req === 'object' && (
+                      <p className="text-gray-500 pl-3">Evidence: <span className="text-[#53041B] font-semibold">{req.evidence}</span> | Target Score: <span className="text-[#BB2649] font-semibold">{req.score}%</span></p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#BB2649]">Job Description</p>
