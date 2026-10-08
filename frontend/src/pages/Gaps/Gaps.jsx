@@ -63,32 +63,33 @@ export default function Gaps() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-96 space-y-4">
-        <Loader2 className="w-10 h-10 text-[#BB2649] animate-spin" />
-        <p className="text-[#770429] font-medium animate-pulse">Querying Verification Database & Building Roadmap...</p>
+      <div className="rr-page rr-content flex flex-col items-center justify-center h-96 space-y-4">
+        <Loader2 className="w-10 h-10 text-[var(--color-blue)] animate-spin" />
+        <p className="text-[var(--color-text-secondary)] font-medium animate-pulse">Querying Verification Database & Building Roadmap...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-12 max-w-5xl mx-auto pb-16">
+    <div className="rr-page rr-content space-y-12 max-w-5xl mx-auto pb-16">
       
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-[#53041B]">Gaps & Roadmap</h1>
-        <p className="text-[#770429] mt-1">Audit unsupported resume claims and follow your custom winding learning path.</p>
+        <p className="rr-eyebrow">Evidence intelligence</p>
+        <h1 className="text-3xl font-bold text-[var(--color-navy)]">Gaps & Roadmap</h1>
+        <p className="text-[var(--color-text-secondary)] mt-1">Audit unsupported resume claims and follow your curated learning timeline.</p>
       </div>
 
       {/* Role Selection Tabs for Customized Learning */}
-      {error && <p role="alert" className="text-red-600 text-xs font-semibold px-2">{error}</p>}
-      <div className="bg-white rounded-2xl border border-[#C92D68]/30 shadow-sm p-6 space-y-4">
+      {error && <p role="alert" className="text-[var(--color-error-ink)] text-xs font-semibold px-2">{error}</p>}
+      <div className="bg-[var(--color-surface)] rounded-[var(--radius-panel)] border border-[var(--color-border)]/30 shadow-sm p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="bg-[#F8D8E3]/60 p-2.5 rounded-xl">
-            <Briefcase className="w-5 h-5 text-[#770429]" />
+          <div className="bg-[var(--color-workspace-secondary)]/60 p-2.5 rounded-[var(--radius-panel)]">
+            <Briefcase className="w-5 h-5 text-[var(--color-text-secondary)]" />
           </div>
           <div>
-            <h2 className="font-bold text-[#53041B] text-lg">Choose Role You Are Preparing For</h2>
-            <p className="text-xs text-gray-500">Switch target roles to instantly adapt your winding milestone roadmap and required skills.</p>
+            <h2 className="font-bold text-[var(--color-navy)] text-lg">Choose Role You Are Preparing For</h2>
+            <p className="text-xs text-[var(--color-text-muted)]">Switch target roles to instantly adapt your milestone roadmap and required skills.</p>
           </div>
         </div>
 
@@ -97,10 +98,10 @@ export default function Gaps() {
             <button
               key={role}
               onClick={() => setSelectedRole(role)}
-              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm cursor-pointer ${
+              className={`px-5 py-2.5 rounded-[var(--radius-control)] font-bold text-sm transition-all shadow-sm cursor-pointer ${
                 selectedRole === role
-                  ? 'bg-[#53041B] text-white shadow-md scale-105'
-                  : 'bg-gray-100 hover:bg-[#FDF0F4] text-gray-700 hover:text-[#53041B] border border-gray-200'
+                  ? "bg-[var(--color-workspace-secondary)] text-[var(--color-navy)] shadow-[var(--shadow-panel)] scale-105"
+                  : "bg-[var(--color-surface)] hover:bg-[var(--color-workspace-secondary)] text-[var(--color-text-secondary)] hover:text-[var(--color-navy)] border border-[var(--color-border)]"
               }`}
             >
               {role}
@@ -110,39 +111,39 @@ export default function Gaps() {
       </div>
 
       {/* Database Gaps Audit Section */}
-      <div className="bg-white rounded-2xl border border-[#C92D68]/40 shadow-sm p-6 sm:p-8">
-        <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
-          <div className="bg-red-50 p-2.5 rounded-xl">
-            <ShieldAlert className="w-6 h-6 text-red-500" />
+      <div className="bg-[var(--color-surface)] rounded-[var(--radius-panel)] border border-[var(--color-border)]/40 shadow-sm p-6 sm:p-8">
+        <div className="flex items-center gap-3 mb-6 border-b border-[var(--color-border)] pb-4">
+          <div className="bg-[var(--color-error-soft)] p-2.5 rounded-[var(--radius-panel)]">
+            <ShieldAlert className="w-6 h-6 text-[var(--color-error-ink)]" />
           </div>
           <div>
-            <h2 className="font-bold text-[#53041B] text-xl">Database Evidence Gaps</h2>
-            <p className="text-sm text-gray-500">Unverified resume claims identified from SQLite verification logs.</p>
+            <h2 className="font-bold text-[var(--color-navy)] text-xl">Database Evidence Gaps</h2>
+            <p className="text-sm text-[var(--color-text-muted)]">Unverified resume claims identified from SQLite verification logs.</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {gaps.length === 0 && <p className="text-sm text-gray-500">No stored evidence gaps found in SQLite database.</p>}
+          {gaps.length === 0 && <p className="text-sm text-[var(--color-text-muted)]">No stored evidence gaps found in SQLite database.</p>}
           {gaps.map((gap) => {
             const isHigh = gap.severity === 'High';
             return (
-              <div key={gap.id} className={`rounded-2xl border ${isHigh ? 'border-red-200 bg-red-50/40' : 'border-amber-200 bg-amber-50/40'} p-6 flex flex-col justify-between space-y-4 shadow-sm`}>
+              <div key={gap.id} className={`rounded-[var(--radius-panel)] border ${isHigh ? "border-[var(--color-error)] bg-[var(--color-error-soft)]/40" : "border-[var(--color-gold)] bg-[var(--color-warning-soft)]/40"} p-6 flex flex-col justify-between space-y-4 shadow-sm`}>
                 <div>
                   <div className="flex justify-between items-start mb-3">
-                    <div className="bg-white p-2.5 rounded-xl shadow-sm border border-gray-100">
-                      {isHigh ? <Terminal className="w-5 h-5 text-red-600" /> : <AlertTriangle className="w-5 h-5 text-orange-600" />}
+                    <div className="bg-[var(--color-surface)] p-2.5 rounded-[var(--radius-panel)] shadow-sm border border-[var(--color-border)]">
+                      {isHigh ? <Terminal className="w-5 h-5 text-[var(--color-error-ink)]" /> : <AlertTriangle className="w-5 h-5 text-[var(--color-warning-ink)]" />}
                     </div>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full bg-white ${isHigh ? 'text-red-600 border-red-200' : 'text-orange-600 border-orange-200'} shadow-sm border`}>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full bg-[var(--color-surface)] ${isHigh ? "text-[var(--color-error-ink)] border-[var(--color-error)]" : "text-[var(--color-warning-ink)] border-[var(--color-gold)]"} shadow-sm border`}>
                       {gap.severity} Priority
                     </span>
                   </div>
-                  <h3 className="font-bold text-gray-900 text-lg mb-1">{gap.skill}</h3>
-                  <p className="text-sm text-gray-800 font-medium mb-3">{gap.issue}</p>
+                  <h3 className="font-bold text-[var(--color-text-primary)] text-lg mb-1">{gap.skill}</h3>
+                  <p className="text-sm text-[var(--color-text-primary)] font-medium mb-3">{gap.issue}</p>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur-sm p-3.5 rounded-xl border border-gray-200/60 space-y-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#770429] block">Why it was flagged:</span>
-                  <p className="text-xs text-gray-600 leading-relaxed">{gap.whyMissing}</p>
+                <div className="bg-[var(--color-surface)]/90 p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-border)]/60 space-y-1">
+                  <span className="text-[11px] font-bold tracking-wide text-[var(--color-text-secondary)] block">Why it was flagged:</span>
+                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">{gap.whyMissing}</p>
                 </div>
               </div>
             );
@@ -151,37 +152,22 @@ export default function Gaps() {
       </div>
 
       {/* CURVED ROAD MAP SECTION */}
-      <div className="bg-[#FDFBF7] rounded-3xl border border-[#C92D68]/30 shadow-lg p-6 sm:p-12 relative overflow-hidden">
+      <div className="bg-[var(--color-workspace)] rounded-[var(--radius-panel)] border border-[var(--color-border)]/30 shadow-[var(--shadow-panel)] p-6 sm:p-12 relative overflow-hidden">
         
-        <div className="absolute top-0 right-0 -mt-16 -mr-16 w-96 h-96 bg-[#F8D8E3]/50 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-0 right-0 -mt-16 -mr-16 w-96 h-96 bg-[var(--color-workspace-secondary)]/50 rounded-full hidden pointer-events-none"></div>
 
         <div className="mb-10 relative z-10 text-center sm:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#F8D8E3] text-[#53041B] mb-2">
-            <Sparkles className="w-3.5 h-3.5" /> Curated Winding Roadmap ({selectedRole})
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[var(--color-workspace-secondary)] text-[var(--color-navy)] mb-2">
+            <Sparkles className="w-3.5 h-3.5" /> Curated Learning Roadmap ({selectedRole})
           </div>
-          <h2 className="font-bold text-[#53041B] text-2xl sm:text-3xl">Interactive Learning Highway</h2>
-          <p className="text-[#770429] text-sm mt-1">Follow the curved checkpoints below to master required skills step by step.</p>
+          <h2 className="font-bold text-[var(--color-navy)] text-2xl sm:text-3xl">Your learning timeline</h2>
+          <p className="text-[var(--color-text-secondary)] text-sm mt-1">Follow the checkpoints below to master required skills step by step.</p>
         </div>
 
         {/* Curved Road Container with SVG Winding Line */}
-        <div className="relative z-10 max-w-3xl mx-auto py-6">
+        <div className="rr-roadmap-timeline relative z-10 max-w-3xl mx-auto py-6">
           
-          <div className="absolute inset-0 flex justify-center pointer-events-none">
-            <svg className="w-full h-full" viewBox="0 0 400 800" fill="none" preserveAspectRatio="none">
-              <path 
-                d="M 200 40 Q 350 200, 200 360 T 200 680" 
-                stroke="#E5C5D2" 
-                strokeWidth="32" 
-                strokeLinecap="round" 
-              />
-              <path 
-                d="M 200 40 Q 350 200, 200 360 T 200 680" 
-                stroke="#53041B" 
-                strokeWidth="4" 
-                strokeDasharray="12 12" 
-              />
-            </svg>
-          </div>
+
 
           <div className="space-y-16 relative z-10">
             {currentMilestones.map((milestone, index) => {
@@ -190,27 +176,27 @@ export default function Gaps() {
                 <div 
                   key={milestone.step}
                   onClick={() => setSelectedMilestone(milestone)}
-                  className={`flex flex-col sm:flex-row items-center gap-6 ${isEven ? 'sm:flex-row-reverse' : ''} group cursor-pointer`}
+                  className={`rr-roadmap-step ${isEven ? 'rr-roadmap-even' : ''} group cursor-pointer`}
                 >
-                  <div className="w-full sm:w-[calc(50%-40px)] bg-white border border-[#C92D68]/30 rounded-2xl p-6 shadow-md hover:shadow-xl hover:border-[#BB2649] transition-all group-hover:-translate-y-1">
+                  <div className="w-full sm:w-[calc(50%-40px)] bg-[var(--color-surface)] border border-[var(--color-border)]/30 rounded-[var(--radius-panel)] p-6 shadow-[var(--shadow-panel)] hover:shadow-[var(--shadow-panel)] hover:border-[var(--color-border)] transition-all group-hover:-translate-y-1">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="px-3 py-1 bg-[#FDF0F4] text-[#770429] text-xs font-bold rounded-full border border-[#C92D68]/20">
+                      <span className="px-3 py-1 bg-[var(--color-workspace-secondary)] text-[var(--color-text-secondary)] text-xs font-bold rounded-full border border-[var(--color-border)]/20">
                         {milestone.impact}
                       </span>
-                      <span className="text-xs font-bold text-gray-400">Est. {milestone.time}</span>
+                      <span className="text-xs font-bold text-[var(--color-text-muted)]">Est. {milestone.time}</span>
                     </div>
 
-                    <h3 className="font-bold text-[#53041B] text-lg mb-1 group-hover:text-[#BB2649] transition-colors">{milestone.title}</h3>
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Required Skill: <span className="text-[#BB2649]">{milestone.skill}</span></p>
-                    <p className="text-xs text-gray-600 leading-relaxed mb-4">{milestone.desc}</p>
+                    <h3 className="font-bold text-[var(--color-navy)] text-lg mb-1 group-hover:text-[var(--color-blue)] transition-colors">{milestone.title}</h3>
+                    <p className="text-xs font-semibold text-[var(--color-text-secondary)] mb-2">Required Skill: <span className="text-[var(--color-blue)]">{milestone.skill}</span></p>
+                    <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed mb-4">{milestone.desc}</p>
 
-                    <div className="flex items-center gap-1 text-xs font-bold text-[#770429] group-hover:translate-x-1 transition-transform">
+                    <div className="flex items-center gap-1 text-xs font-bold text-[var(--color-text-secondary)] group-hover:translate-x-1 transition-transform">
                       <span>Inspect Deep Dive</span>
                       <ArrowRight className="w-4 h-4" />
                     </div>
                   </div>
 
-                  <div className="w-14 h-14 bg-[#53041B] text-[#F8D8E3] rounded-full border-4 border-[#FDFBF7] shadow-xl flex items-center justify-center font-black text-lg shrink-0 group-hover:scale-110 group-hover:bg-[#BB2649] transition-transform">
+                  <div className="w-14 h-14 bg-[var(--color-navy)] text-[var(--color-surface)] rounded-full border-4 border-[var(--color-border)] shadow-[var(--shadow-panel)] flex items-center justify-center font-semibold text-lg shrink-0 group-hover:scale-110 group-hover:bg-[var(--color-cyan)] transition-transform">
                     0{milestone.step}
                   </div>
 
@@ -225,49 +211,49 @@ export default function Gaps() {
 
       {/* Deep-Dive Guide Modal */}
       {selectedMilestone && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#C92D68]/30 space-y-6 relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
+          <div className="bg-[var(--color-surface)] rounded-[var(--radius-panel)] max-w-lg w-full p-6 sm:p-8 shadow-[var(--shadow-panel)] border border-[var(--color-border)]/30 space-y-6 relative animate-in zoom-in-95 duration-200">
             
             <button 
               onClick={() => setSelectedMilestone(null)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer"
+              className="absolute top-6 right-6 p-2 rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-workspace-secondary)] text-[var(--color-text-secondary)] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#53041B] text-[#F8D8E3] rounded-xl flex items-center justify-center font-black text-lg shadow-sm">
+              <div className="w-10 h-10 bg-[var(--color-navy)] text-[var(--color-surface)] rounded-[var(--radius-panel)] flex items-center justify-center font-semibold text-lg shadow-sm">
                 0{selectedMilestone.step}
               </div>
               <div>
-                <span className="text-xs font-bold text-[#770429] uppercase tracking-wider">Required Skill: {selectedMilestone.skill}</span>
-                <h3 className="text-xl font-bold text-[#53041B]">{selectedMilestone.title}</h3>
+                <span className="text-xs font-bold text-[var(--color-text-secondary)] tracking-wide">Required Skill: {selectedMilestone.skill}</span>
+                <h3 className="text-xl font-bold text-[var(--color-navy)]">{selectedMilestone.title}</h3>
               </div>
             </div>
 
             <div className="space-y-4 text-sm">
-              <div className="p-4 rounded-2xl bg-[#FDF0F4]/50 border border-[#C92D68]/20 space-y-1">
-                <span className="text-xs font-bold text-[#770429] uppercase">Core Objective</span>
-                <p className="text-gray-800 font-medium">{selectedMilestone.details.objective}</p>
+              <div className="p-4 rounded-[var(--radius-panel)] bg-[var(--color-workspace-secondary)]/50 border border-[var(--color-border)]/20 space-y-1">
+                <span className="text-xs font-bold text-[var(--color-text-secondary)] uppercase">Core Objective</span>
+                <p className="text-[var(--color-text-primary)] font-medium">{selectedMilestone.details.objective}</p>
               </div>
 
               <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-[#BB2649]" /> Reference Configuration / Code
+                <span className="text-xs font-bold tracking-wide text-[var(--color-text-muted)] flex items-center gap-1.5">
+                  <Terminal className="w-3.5 h-3.5 text-[var(--color-blue)]" /> Reference Configuration / Code
                 </span>
-                <div className="bg-gray-900 text-emerald-400 font-mono text-xs p-4 rounded-xl overflow-x-auto shadow-inner">
+                <div className="bg-[var(--color-navy)] text-[var(--color-blue)] font-mono text-xs p-4 rounded-[var(--radius-panel)] overflow-x-auto shadow-inner">
                   <code>{selectedMilestone.details.codeSnippet}</code>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-[#BB2649]" /> Execution Tasks
+                <span className="text-xs font-bold tracking-wide text-[var(--color-text-muted)] flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-[var(--color-blue)]" /> Execution Tasks
                 </span>
                 <div className="space-y-2">
                   {selectedMilestone.details.tasks.map((task, idx) => (
-                    <div key={idx} className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50 border border-gray-100 text-xs text-gray-800 font-medium">
-                      <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                    <div key={idx} className="flex items-start gap-2.5 p-3 rounded-[var(--radius-panel)] bg-[var(--color-surface)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-[var(--color-blue)] shrink-0 mt-0.5" />
                       <span>{task}</span>
                     </div>
                   ))}
@@ -278,7 +264,7 @@ export default function Gaps() {
             <div className="pt-2">
               <button 
                 onClick={() => setSelectedMilestone(null)}
-                className="w-full py-3 bg-[#53041B] hover:bg-[#770429] text-white font-bold rounded-xl transition-colors shadow-md text-sm cursor-pointer"
+                className="w-full py-3 bg-[var(--color-orange)] hover:bg-[var(--color-gold)] text-[var(--color-navy)] font-bold rounded-[var(--radius-control)] transition-colors shadow-[var(--shadow-panel)] text-sm cursor-pointer"
               >
                 Got It, Let's Master This
               </button>

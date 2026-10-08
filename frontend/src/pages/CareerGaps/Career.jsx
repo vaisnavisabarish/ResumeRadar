@@ -174,15 +174,15 @@ export default function CareerGaps() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-96 space-y-4">
-        <Loader2 className="w-10 h-10 text-[#BB2649] animate-spin" />
-        <p className="text-[#770429] font-medium animate-pulse">Querying SQLite Database & Auditing Career Representation...</p>
+      <div className="rr-page rr-content flex flex-col items-center justify-center h-96 space-y-4">
+        <Loader2 className="w-10 h-10 text-[var(--color-blue)] animate-spin" />
+        <p className="text-[var(--color-text-secondary)] font-medium animate-pulse">Querying SQLite Database & Auditing Career Representation...</p>
       </div>
     );
   }
 
   if (error) {
-    return <div role="alert" className="bg-red-50 p-6 rounded-xl border border-red-200 text-center text-red-700 font-semibold max-w-xl mx-auto mt-12">Database Error: {error}</div>;
+    return <div role="alert" className="rr-page rr-content bg-[var(--color-error-soft)] p-6 rounded-[var(--radius-panel)] border border-[var(--color-error)] text-center text-[var(--color-error-ink)] font-semibold max-w-xl mx-auto mt-12">Database Error: {error}</div>;
   }
 
   const filteredGaps = gapsData.gaps.filter(gap => {
@@ -196,46 +196,47 @@ export default function CareerGaps() {
   });
 
   return (
-    <div className="space-y-10 max-w-6xl mx-auto pb-16">
+    <div className="rr-page rr-content space-y-10 max-w-6xl mx-auto pb-16">
       
       {/* HEADER & PROFILE COMPLETENESS HERO */}
-      <div className="bg-white rounded-3xl border border-[#C92D68]/30 shadow-sm p-6 sm:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="bg-[var(--color-surface)] rounded-[var(--radius-panel)] border border-[var(--color-border)]/30 shadow-sm p-6 sm:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#FDF0F4] text-[#770429] border border-[#C92D68]/20">
-            <ShieldAlert className="w-3.5 h-3.5 text-[#BB2649]" /> SQLite Footprint Integrity Audit
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-workspace-secondary)] text-[var(--color-text-secondary)] border border-[var(--color-border)]/20">
+            <ShieldAlert className="w-3.5 h-3.5 text-[var(--color-blue)]" /> SQLite Footprint Integrity Audit
           </div>
-          <h1 className="text-3xl font-bold text-[#53041B]">Career Gaps</h1>
-          <p className="text-[#770429] text-sm max-w-xl">
+          <p className="rr-eyebrow">Evidence intelligence</p>
+          <h1 className="text-3xl font-bold text-[var(--color-navy)]">Career Gaps</h1>
+          <p className="text-[var(--color-text-secondary)] text-sm max-w-xl">
             Find what's missing, weak, or inconsistent across your resume, GitHub, LinkedIn and portfolio.
           </p>
         </div>
 
         {/* Completeness Card */}
-        <div className="bg-gradient-to-br from-[#53041B] to-[#770429] p-5 rounded-2xl text-white shadow-md min-w-[260px] space-y-3">
-          <div className="flex justify-between items-center text-xs font-bold text-[#F8D8E3] uppercase tracking-wider">
+        <div className="bg-[var(--color-navy-secondary)]  p-5 rounded-[var(--radius-panel)] text-[var(--color-surface)] shadow-[var(--shadow-panel)] min-w-[260px] space-y-3">
+          <div className="flex justify-between items-center text-xs font-bold text-[var(--color-surface)] tracking-wide">
             <span>Profile Completeness</span>
             <span>{gapsData.completeness}%</span>
           </div>
           <div className="w-full bg-black/30 h-3 rounded-full overflow-hidden p-0.5">
-            <div className="h-full bg-[#F8D8E3] rounded-full transition-all duration-1000" style={{ width: `${gapsData.completeness}%` }}></div>
+            <div className="h-full bg-[var(--color-workspace-secondary)] rounded-full transition-all duration-1000" style={{ width: `${gapsData.completeness}%` }}></div>
           </div>
-          <p className="text-xs text-[#FDF0F4] font-medium flex items-center justify-between pt-1">
+          <p className="text-xs text-[var(--color-surface)] font-medium flex items-center justify-between pt-1">
             <span>{gapsData.totalGaps} gaps detected</span>
-            <span className="text-[#F8D8E3] font-bold">{gapsData.highPriorityCount} high priority</span>
+            <span className="text-[var(--color-surface)] font-bold">{gapsData.highPriorityCount} high priority</span>
           </p>
         </div>
       </div>
 
       {/* FILTER TABS */}
-      <div className="flex flex-wrap gap-2 pb-2 border-b border-gray-200/60">
+      <div className="flex flex-wrap gap-2 pb-2 border-b border-[var(--color-border)]/60">
         {['All', 'Evidence', 'Skills', 'Profile', 'Inconsistency', 'High Priority'].map((filter) => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            className={`px-4 py-2 rounded-xl font-bold text-xs transition-all shadow-sm cursor-pointer ${
+            className={`px-4 py-2 rounded-[var(--radius-control)] font-bold text-xs transition-all shadow-sm cursor-pointer ${
               activeFilter === filter
-                ? 'bg-[#53041B] text-white shadow'
-                : 'bg-white hover:bg-[#FDF0F4] text-gray-700 hover:text-[#53041B] border border-gray-200'
+                ? "bg-[var(--color-workspace-secondary)] text-[var(--color-navy)] shadow"
+                : "bg-[var(--color-surface)] hover:bg-[var(--color-workspace-secondary)] text-[var(--color-text-secondary)] hover:text-[var(--color-navy)] border border-[var(--color-border)]"
             }`}
           >
             {filter}
@@ -252,43 +253,43 @@ export default function CareerGaps() {
           return (
             <div 
               key={gap.id} 
-              className={`bg-white rounded-2xl border ${
-                isHigh ? 'border-red-200 shadow-red-50/50' : isMedium ? 'border-amber-200' : 'border-blue-200'
-              } shadow-sm p-6 flex flex-col justify-between space-y-6 hover:shadow-md transition-all`}
+              className={`bg-[var(--color-surface)] rounded-[var(--radius-panel)] border ${
+                isHigh ? "border-[var(--color-error)] shadow-red-50/50" : isMedium ? "border-[var(--color-gold)]" : "border-[var(--color-border)]"
+              } shadow-sm p-6 flex flex-col justify-between space-y-6 hover:shadow-[var(--shadow-panel)] transition-all`}
             >
               <div className="space-y-4">
                 {/* Top Badge Row */}
                 <div className="flex justify-between items-center">
                   <span className={`text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 ${
-                    isHigh ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                    isHigh ? "bg-[var(--color-error-soft)] text-[var(--color-error-ink)] border-[var(--color-error)]" : "bg-[var(--color-warning-soft)] text-[var(--color-warning-ink)] border-[var(--color-gold)]"
                   }`}>
                     {isHigh ? '🔴 HIGH PRIORITY' : '🟡 MEDIUM PRIORITY'}
                   </span>
-                  <span className="text-xs font-black text-[#53041B] bg-[#FDF0F4] px-2.5 py-1 rounded-lg border border-[#C92D68]/20">
+                  <span className="text-xs font-semibold text-[var(--color-navy)] bg-[var(--color-workspace-secondary)] px-2.5 py-1 rounded-lg border border-[var(--color-border)]/20">
                     {gap.confidence} confidence
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-[#770429] uppercase tracking-wider block mb-1">
+                  <span className="text-[11px] font-bold text-[var(--color-text-secondary)] tracking-wide block mb-1">
                     {gap.type} Gap
                   </span>
-                  <h3 className="text-xl font-bold text-gray-900">{gap.title}</h3>
+                  <h3 className="text-xl font-bold text-[var(--color-text-primary)]">{gap.title}</h3>
                 </div>
 
                 {/* Card Specific Layouts */}
                 {gap.type === 'Evidence' && (
                   <div className="space-y-3 text-xs">
-                    <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-100 space-y-1.5">
-                      <p className="font-bold text-gray-700">Resume claim</p>
+                    <div className="bg-[var(--color-surface)] p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-border)] space-y-1.5">
+                      <p className="font-bold text-[var(--color-text-secondary)]">Resume claim</p>
                       {gap.resumeClaims.map((claim, i) => (
-                        <p key={i} className="text-emerald-700 font-medium flex items-center gap-1.5">✓ {claim}</p>
+                        <p key={i} className="text-[var(--color-blue)] font-medium flex items-center gap-1.5">✓ {claim}</p>
                       ))}
                     </div>
-                    <div className="bg-red-50/50 p-3.5 rounded-xl border border-red-100 space-y-1.5">
-                      <p className="font-bold text-red-900">Evidence found</p>
+                    <div className="bg-[var(--color-error-soft)]/50 p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-error)] space-y-1.5">
+                      <p className="font-bold text-[var(--color-error-ink)]">Evidence found</p>
                       {gap.evidenceFound.map((ev, i) => (
-                        <p key={i} className="text-red-600 font-medium flex items-center gap-1.5">✕ {ev}</p>
+                        <p key={i} className="text-[var(--color-error-ink)] font-medium flex items-center gap-1.5">✕ {ev}</p>
                       ))}
                     </div>
                   </div>
@@ -296,16 +297,16 @@ export default function CareerGaps() {
 
                 {gap.type === 'Representation' && (
                   <div className="space-y-3 text-xs">
-                    <div className="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-100 space-y-1.5">
-                      <p className="font-bold text-emerald-900">Found across</p>
+                    <div className="bg-[var(--color-workspace-secondary)]/50 p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-border)] space-y-1.5">
+                      <p className="font-bold text-[var(--color-blue)]">Found across</p>
                       {gap.foundAcross.map((fa, i) => (
-                        <p key={i} className="text-emerald-700 font-medium flex items-center gap-1.5">✓ {fa}</p>
+                        <p key={i} className="text-[var(--color-blue)] font-medium flex items-center gap-1.5">✓ {fa}</p>
                       ))}
                     </div>
-                    <div className="bg-amber-50/60 p-3.5 rounded-xl border border-amber-200 space-y-1.5">
-                      <p className="font-bold text-amber-900">BUT Missing In</p>
+                    <div className="bg-[var(--color-warning-soft)]/60 p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-gold)] space-y-1.5">
+                      <p className="font-bold text-[var(--color-warning-ink)]">BUT Missing In</p>
                       {gap.missingAcross.map((ma, i) => (
-                        <p key={i} className="text-amber-700 font-medium flex items-center gap-1.5">✕ {ma}</p>
+                        <p key={i} className="text-[var(--color-warning-ink)] font-medium flex items-center gap-1.5">✕ {ma}</p>
                       ))}
                     </div>
                   </div>
@@ -313,13 +314,13 @@ export default function CareerGaps() {
 
                 {gap.type === 'Profile' && (
                   <div className="space-y-3 text-xs">
-                    <p className="text-gray-600 leading-relaxed font-medium">{gap.description}</p>
-                    <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-100 space-y-2">
-                      <p className="font-bold text-gray-700">Current evidence</p>
+                    <p className="text-[var(--color-text-secondary)] leading-relaxed font-medium">{gap.description}</p>
+                    <div className="bg-[var(--color-surface)] p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-border)] space-y-2">
+                      <p className="font-bold text-[var(--color-text-secondary)]">Current evidence</p>
                       {gap.currentEvidence.map((ce, i) => (
-                        <div key={i} className="flex justify-between items-center text-gray-800">
+                        <div key={i} className="flex justify-between items-center text-[var(--color-text-primary)]">
                           <span>{ce.label}</span>
-                          <span className={ce.present ? 'text-emerald-600 font-bold' : 'text-red-500 font-bold'}>
+                          <span className={ce.present ? "text-[var(--color-blue)] font-bold" : "text-[var(--color-error-ink)] font-bold"}>
                             {ce.present ? `✓ ${ce.count}` : '✕'}
                           </span>
                         </div>
@@ -330,12 +331,12 @@ export default function CareerGaps() {
 
                 {gap.type === 'Inconsistency' && (
                   <div className="space-y-3 text-xs">
-                    <div className="bg-orange-50/60 p-3.5 rounded-xl border border-orange-200 space-y-2">
-                      <p className="font-bold text-orange-900">Cross-Source Comparison</p>
+                    <div className="bg-[var(--color-warning-soft)]/60 p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-gold)] space-y-2">
+                      <p className="font-bold text-[var(--color-warning-ink)]">Cross-Source Comparison</p>
                       {gap.sources.map((src, i) => (
-                        <div key={i} className="flex justify-between items-center text-gray-800 font-medium border-b border-orange-100/60 pb-1 last:border-0">
-                          <span className="font-semibold text-[#53041B]">{src.name}</span>
-                          <span className="text-gray-600">{src.detail}</span>
+                        <div key={i} className="flex justify-between items-center text-[var(--color-text-primary)] font-medium border-b border-[var(--color-gold)]/60 pb-1 last:border-0">
+                          <span className="font-semibold text-[var(--color-navy)]">{src.name}</span>
+                          <span className="text-[var(--color-text-secondary)]">{src.detail}</span>
                         </div>
                       ))}
                     </div>
@@ -343,11 +344,11 @@ export default function CareerGaps() {
                 )}
 
                 {/* Why / Explanation Box */}
-                <div className="bg-[#FDF0F4]/60 p-4 rounded-xl border border-[#C92D68]/20 space-y-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#770429] block">
+                <div className="bg-[var(--color-workspace-secondary)]/60 p-4 rounded-[var(--radius-panel)] border border-[var(--color-border)]/20 space-y-1">
+                  <span className="text-[10px] font-semibold tracking-wide text-[var(--color-text-secondary)] block">
                     {gap.type === 'Profile' ? 'Recommendation' : 'Why it was flagged'}
                   </span>
-                  <p className="text-xs text-gray-700 leading-relaxed font-medium">
+                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed font-medium">
                     {gap.why || gap.recommendation}
                   </p>
                 </div>
@@ -357,7 +358,7 @@ export default function CareerGaps() {
               <div>
                 <button
                   onClick={() => setSelectedActionModal(gap)}
-                  className="w-full py-3 bg-[#53041B] hover:bg-[#770429] text-white font-bold rounded-xl transition-all shadow-sm text-xs flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 bg-[var(--color-orange)] hover:bg-[var(--color-gold)] text-[var(--color-navy)] font-bold rounded-[var(--radius-control)] transition-all shadow-sm text-xs flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>{gap.actionLabel}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -370,37 +371,37 @@ export default function CareerGaps() {
       </div>
 
       {/* SUMMARY FOOTER & BIGGEST OPPORTUNITY CALLOUT */}
-      <div className="bg-gradient-to-br from-[#53041B] to-[#770429] rounded-3xl p-8 text-white shadow-lg space-y-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="bg-[var(--color-navy-secondary)]  rounded-[var(--radius-panel)] p-8 text-[var(--color-surface)] shadow-[var(--shadow-panel)] space-y-6 relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-64 h-64 bg-[var(--color-surface)]/5 rounded-full hidden pointer-events-none"></div>
         
         <div className="border-b border-white/10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-2xl font-bold">YOUR CAREER GAP BREAKDOWN</h2>
-            <p className="text-xs text-[#F8D8E3] mt-1">Summary of representation audit across all verified SQLite telemetry sources.</p>
+            <p className="text-xs text-[var(--color-surface)] mt-1">Summary of representation audit across all verified SQLite telemetry sources.</p>
           </div>
-          <div className="flex flex-wrap gap-4 text-xs font-bold bg-black/20 px-4 py-2.5 rounded-2xl border border-white/10">
-            <span>Evidence Gaps: <strong className="text-white">{gapsData.breakdown.evidence}</strong></span>
+          <div className="flex flex-wrap gap-4 text-xs font-bold bg-black/20 px-4 py-2.5 rounded-[var(--radius-panel)] border border-white/10">
+            <span>Evidence Gaps: <strong className="text-[var(--color-surface)]">{gapsData.breakdown.evidence}</strong></span>
             <span>•</span>
-            <span>Representation: <strong className="text-white">{gapsData.breakdown.representation}</strong></span>
+            <span>Representation: <strong className="text-[var(--color-surface)]">{gapsData.breakdown.representation}</strong></span>
             <span>•</span>
-            <span>Profile: <strong className="text-white">{gapsData.breakdown.profile}</strong></span>
+            <span>Profile: <strong className="text-[var(--color-surface)]">{gapsData.breakdown.profile}</strong></span>
             <span>•</span>
-            <span>Inconsistencies: <strong className="text-white">{gapsData.breakdown.inconsistency}</strong></span>
+            <span>Inconsistencies: <strong className="text-[var(--color-surface)]">{gapsData.breakdown.inconsistency}</strong></span>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-2">
           <div className="space-y-1">
-            <span className="text-xs font-bold text-[#F8D8E3] uppercase tracking-wider block">Biggest Opportunity</span>
-            <h3 className="text-xl font-black text-white">Your evidence exists, but is scattered.</h3>
-            <p className="text-xs text-[#FDF0F4] max-w-lg">
+            <span className="text-xs font-bold text-[var(--color-surface)] tracking-wide block">Biggest Opportunity</span>
+            <h3 className="text-xl font-semibold text-[var(--color-surface)]">Your evidence exists, but is scattered.</h3>
+            <p className="text-xs text-[var(--color-surface)] max-w-lg">
               Verified technical experience in your SQLite database is not represented consistently across your external professional profiles.
             </p>
           </div>
 
           <button
             onClick={() => navigate('/evidence')}
-            className="px-6 py-3.5 bg-white hover:bg-[#FDF0F4] text-[#53041B] font-extrabold rounded-2xl transition-all shadow-md text-xs flex items-center gap-2 shrink-0 cursor-pointer"
+            className="px-6 py-3.5 bg-[var(--color-surface)] hover:bg-[var(--color-workspace-secondary)] text-[var(--color-navy)] font-semibold rounded-[var(--radius-panel)] transition-all shadow-[var(--shadow-panel)] text-xs flex items-center gap-2 shrink-0 cursor-pointer"
           >
             <span>View Digital Footprint</span>
             <ArrowRight className="w-4 h-4" />
@@ -410,30 +411,30 @@ export default function CareerGaps() {
 
       {/* ACTION MODAL */}
       {selectedActionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-[#C92D68]/30 space-y-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200">
+          <div className="bg-[var(--color-surface)] rounded-[var(--radius-panel)] max-w-md w-full p-6 sm:p-8 shadow-[var(--shadow-panel)] border border-[var(--color-border)]/30 space-y-6 relative">
             <button
               onClick={() => setSelectedActionModal(null)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer"
+              className="absolute top-6 right-6 p-2 rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-workspace-secondary)] text-[var(--color-text-secondary)] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-2">
-              <span className="text-xs font-bold text-[#770429] uppercase tracking-wider">{selectedActionModal.type} Action Wizard</span>
-              <h3 className="text-xl font-bold text-[#53041B]">{selectedActionModal.actionLabel}: {selectedActionModal.title}</h3>
-              <p className="text-xs text-gray-600">Resolve this gap instantly by updating your SQLite verification record or syncing your profile.</p>
+              <span className="text-xs font-bold text-[var(--color-text-secondary)] tracking-wide">{selectedActionModal.type} Action Wizard</span>
+              <h3 className="text-xl font-bold text-[var(--color-navy)]">{selectedActionModal.actionLabel}: {selectedActionModal.title}</h3>
+              <p className="text-xs text-[var(--color-text-secondary)]">Resolve this gap instantly by updating your SQLite verification record or syncing your profile.</p>
             </div>
 
-            <div className="bg-[#FDF0F4] p-4 rounded-2xl border border-[#C92D68]/20 text-xs text-gray-800 space-y-2">
-              <p className="font-bold text-[#53041B]">Recommended Fix:</p>
+            <div className="bg-[var(--color-workspace-secondary)] p-4 rounded-[var(--radius-panel)] border border-[var(--color-border)]/20 text-xs text-[var(--color-text-primary)] space-y-2">
+              <p className="font-bold text-[var(--color-navy)]">Recommended Fix:</p>
               <p>{selectedActionModal.why || selectedActionModal.recommendation}</p>
             </div>
 
             <div className="pt-2 flex gap-3">
               <button
                 onClick={() => setSelectedActionModal(null)}
-                className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs cursor-pointer"
+                className="flex-1 py-3 bg-[var(--color-surface)] hover:bg-[var(--color-workspace-secondary)] text-[var(--color-text-secondary)] font-bold rounded-[var(--radius-control)] text-xs cursor-pointer"
               >
                 Cancel
               </button>
@@ -442,7 +443,7 @@ export default function CareerGaps() {
                   alert(`Successfully executed action for ${selectedActionModal.title} in SQLite database!`);
                   setSelectedActionModal(null);
                 }}
-                className="flex-1 py-3 bg-[#53041B] hover:bg-[#770429] text-white font-bold rounded-xl text-xs shadow-md cursor-pointer"
+                className="flex-1 py-3 bg-[var(--color-orange)] hover:bg-[var(--color-gold)] text-[var(--color-navy)] font-bold rounded-[var(--radius-control)] text-xs shadow-[var(--shadow-panel)] cursor-pointer"
               >
                 Confirm & Sync
               </button>

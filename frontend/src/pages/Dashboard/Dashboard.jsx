@@ -29,7 +29,7 @@ function SkillRadarWidget({ radarData }) {
     <div className="space-y-6 flex flex-col justify-between h-full">
       <div className="flex flex-col xl:flex-row items-center justify-center gap-8 py-4">
         {/* Larger SVG Radar Canvas */}
-        <div className="relative w-72 h-72 flex items-center justify-center bg-[#FDFBF7] rounded-full border border-[#C92D68]/20 shadow-inner">
+        <div className="relative w-72 h-72 flex items-center justify-center bg-[var(--color-workspace)] rounded-full border border-[var(--color-border)]/20 shadow-inner">
           <svg className="w-full h-full overflow-visible" viewBox="0 0 260 260">
             {[0.25, 0.5, 0.75, 1].map((level, idx) => (
               <circle 
@@ -37,7 +37,7 @@ function SkillRadarWidget({ radarData }) {
                 cx={center} 
                 cy={center} 
                 r={radius * level} 
-                stroke="#E5C5D2" 
+                stroke="var(--color-border)"
                 strokeWidth="1.2" 
                 strokeDasharray={level < 1 ? "4 4" : "none"} 
                 fill="none" 
@@ -45,13 +45,13 @@ function SkillRadarWidget({ radarData }) {
             ))}
 
             {points.map((p, idx) => (
-              <line key={idx} x1={center} y1={center} x2={p.x + (Math.cos((Math.PI * 2 / skills.length) * idx - Math.PI / 2) * (radius - Math.hypot(p.x-center, p.y-center)))} y2={p.y} stroke="#E5C5D2" strokeWidth="1.2" />
+              <line key={idx} x1={center} y1={center} x2={p.x + (Math.cos((Math.PI * 2 / skills.length) * idx - Math.PI / 2) * (radius - Math.hypot(p.x-center, p.y-center)))} y2={p.y} stroke="var(--color-border)" strokeWidth="1.2" />
             ))}
 
             <polygon 
               points={polygonPoints} 
-              fill="rgba(83, 4, 27, 0.18)" 
-              stroke="#53041B" 
+              fill="var(--color-evidence-fill)"
+              stroke="var(--color-navy)"
               strokeWidth="3" 
               className="transition-all duration-700 ease-out"
             />
@@ -66,14 +66,14 @@ function SkillRadarWidget({ radarData }) {
                     cx={p.x} 
                     cy={p.y} 
                     r="6.5" 
-                    className="fill-[#53041B] stroke-white stroke-2 transition-transform duration-200 group-hover:scale-150" 
+                    className="fill-[var(--color-navy)] stroke-white stroke-2 transition-transform duration-200 group-hover:scale-150"
                   />
                   <text 
                     x={lx} 
                     y={ly} 
                     textAnchor="middle" 
                     dominantBaseline="central" 
-                    className="text-[11px] font-black fill-[#53041B]"
+                    className="text-[11px] font-semibold fill-[var(--color-navy)]"
                   >
                     {p.skill}
                   </text>
@@ -84,20 +84,20 @@ function SkillRadarWidget({ radarData }) {
         </div>
 
         {/* Detailed Tooltip Box */}
-        <div className="flex-1 bg-[#FDF0F4]/70 border border-[#C92D68]/30 rounded-2xl p-5 space-y-3 text-center xl:text-left w-full shadow-sm">
-          <div className="flex items-center justify-center xl:justify-start gap-2 text-xs font-bold text-[#770429] uppercase tracking-wider">
-            <Sparkles className="w-4 h-4 text-[#BB2649]" /> Axis Deep Dive
+        <div className="flex-1 bg-[var(--color-workspace-secondary)]/70 border border-[var(--color-border)]/30 rounded-[var(--radius-panel)] p-5 space-y-3 text-center xl:text-left w-full shadow-sm">
+          <div className="flex items-center justify-center xl:justify-start gap-2 text-xs font-bold text-[var(--color-text-secondary)] tracking-wide">
+            <Sparkles className="w-4 h-4 text-[var(--color-blue)]" /> Axis Deep Dive
           </div>
           {activeSkill ? (
             <div className="space-y-1">
-              <h4 className="text-lg font-black text-[#53041B]">{activeSkill.skill}</h4>
-              <p className="text-2xl font-black text-[#BB2649]">{activeSkill.score}% <span className="text-xs font-medium text-gray-600">Confidence</span></p>
-              <p className="text-xs text-gray-600">Derived from SQLite database verification weights & AST parsing metrics.</p>
+              <h4 className="text-lg font-semibold text-[var(--color-navy)]">{activeSkill.skill}</h4>
+              <p className="text-2xl font-semibold text-[var(--color-blue)]">{activeSkill.score}% <span className="text-xs font-medium text-[var(--color-text-secondary)]">Confidence</span></p>
+              <p className="text-xs text-[var(--color-text-secondary)]">Derived from SQLite database verification weights & AST parsing metrics.</p>
             </div>
           ) : (
             <div className="space-y-1.5 py-2">
-              <h4 className="text-base font-bold text-[#53041B]">Hover any radar node</h4>
-              <p className="text-xs text-gray-600">Inspect multi-axis vector confidence weights computed from database telemetry.</p>
+              <h4 className="text-base font-bold text-[var(--color-navy)]">Hover any radar node</h4>
+              <p className="text-xs text-[var(--color-text-secondary)]">Inspect multi-axis vector confidence weights computed from database telemetry.</p>
             </div>
           )}
         </div>
@@ -175,9 +175,9 @@ export default function Dashboard() {
           ],
           warning: roleJson.warning,
           platformBreakdown: [
-            { name: 'GitHub Repository Matches', count: githubCount, percentage: total ? Math.round(githubCount / total * 100) : 0, icon: Code2, color: 'bg-purple-600' },
-            { name: 'Google Colab Notebooks', count: 0, percentage: 0, icon: FileText, color: 'bg-amber-600' },
-            { name: 'LinkedIn & Certifications', count: linkedinCount, percentage: total ? Math.round(linkedinCount / total * 100) : 0, icon: Share2, color: 'bg-blue-600' }
+            { name: 'GitHub Repository Matches', count: githubCount, percentage: total ? Math.round(githubCount / total * 100) : 0, icon: Code2, color: "bg-[var(--color-blue)]" },
+            { name: 'Google Colab Notebooks', count: 0, percentage: 0, icon: FileText, color: "bg-[var(--color-gold)]" },
+            { name: 'LinkedIn & Certifications', count: linkedinCount, percentage: total ? Math.round(linkedinCount / total * 100) : 0, icon: Share2, color: "bg-[var(--color-blue)]" }
           ],
           recentLogs: evidence.map(item => ({
             action: 'Stored verification result', target: item.skill,
@@ -196,14 +196,14 @@ export default function Dashboard() {
   }, []);
 
   if (error) {
-    return <div role="alert" className="bg-red-50 p-6 rounded-xl border border-red-200 text-center max-w-xl mx-auto mt-12 text-red-700 font-semibold">{error}</div>;
+    return <div role="alert" className="rr-page rr-content bg-[var(--color-error-soft)] p-6 rounded-[var(--radius-panel)] border border-[var(--color-error)] text-center max-w-xl mx-auto mt-12 text-[var(--color-error-ink)] font-semibold">{error}</div>;
   }
 
   if (loading || !dashboardData) {
     return (
-      <div className="flex flex-col items-center justify-center h-96 space-y-4">
-        <Loader2 className="w-10 h-10 text-[#BB2649] animate-spin" />
-        <p className="text-[#770429] font-medium animate-pulse">Syncing Database Telemetry on Port 5001...</p>
+      <div className="rr-page rr-content flex flex-col items-center justify-center h-96 space-y-4">
+        <Loader2 className="w-10 h-10 text-[var(--color-blue)] animate-spin" />
+        <p className="text-[var(--color-text-secondary)] font-medium animate-pulse">Syncing Database Telemetry on Port 5001...</p>
       </div>
     );
   }
@@ -214,73 +214,74 @@ export default function Dashboard() {
       value: dashboardData.verifiedEvidenceCount,
       subtitle: 'Claims backed by online links',
       icon: CheckCircle2,
-      color: 'text-[#770429]',
-      bg: 'bg-[#F8D8E3]/40',
-      border: 'border-[#C92D68]/50'
+      color: "text-[var(--color-text-secondary)]",
+      bg: "bg-[var(--color-workspace-secondary)]/40",
+      border: "border-[var(--color-border)]/50"
     },
     {
       title: 'Activity Score',
       value: `${dashboardData.activityScore}/100`,
       subtitle: 'Computed from commit & parser velocity',
       icon: Activity,
-      color: 'text-[#53041B]',
-      bg: 'bg-[#FDF0F4]',
-      border: 'border-[#BB2649]/30'
+      color: "text-[var(--color-navy)]",
+      bg: "bg-[var(--color-workspace-secondary)]",
+      border: "border-[var(--color-border)]/30"
     },
     {
       title: 'Consistency Score',
       value: `${dashboardData.consistencyScore}/100`,
       subtitle: 'Derived from verification regularity',
       icon: CalendarCheck,
-      color: 'text-[#770429]',
-      bg: 'bg-[#F8D8E3]/50',
-      border: 'border-[#C92D68]/40'
+      color: "text-[var(--color-text-secondary)]",
+      bg: "bg-[var(--color-workspace-secondary)]/50",
+      border: "border-[var(--color-border)]/40"
     },
     {
       title: 'Major Gaps',
       value: dashboardData.majorGapsCount,
       subtitle: 'Unsupported resume claims',
       icon: ShieldAlert,
-      color: 'text-red-600/80',
-      bg: 'bg-red-50',
-      border: 'border-red-100'
+      color: "text-[var(--color-error-ink)]/80",
+      bg: "bg-[var(--color-error-soft)]",
+      border: "border-[var(--color-error)]"
     },
   ];
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-10">
+    <div className="rr-page rr-content space-y-8 max-w-7xl mx-auto pb-10">
       
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-[#53041B]">Overview</h1>
-        <p className="text-[#770429] mt-1">Your extracted profile and live database readiness analysis.</p>
+        <p className="rr-eyebrow">Evidence intelligence</p>
+        <h1 className="text-3xl font-bold text-[var(--color-navy)]">Overview</h1>
+        <p className="text-[var(--color-text-secondary)] mt-1">Your extracted profile and live database readiness analysis.</p>
       </div>
 
-      {dashboardData.warning && <p role="status" className="text-[#770429] text-xs font-semibold">{dashboardData.warning}</p>}
+      {dashboardData.warning && <p role="status" className="text-[var(--color-text-secondary)] text-xs font-semibold">{dashboardData.warning}</p>}
       
       {/* Top Section: Profile Card & Score Card */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left: Profile Summary */}
-        <div className="bg-white p-6 rounded-2xl border border-[#C92D68]/40 shadow-sm col-span-1 lg:col-span-2 flex flex-col sm:flex-row gap-6 items-center sm:items-start transition-all hover:shadow-md">
-          <div className="w-24 h-24 bg-[#F8D8E3]/50 rounded-full flex items-center justify-center shrink-0 border-4 border-[#FDF0F4]">
-            <User className="w-10 h-10 text-[#770429]" />
+        <div className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-panel)] border border-[var(--color-border)]/40 shadow-sm col-span-1 lg:col-span-2 flex flex-col sm:flex-row gap-6 items-center sm:items-start transition-all hover:shadow-[var(--shadow-panel)]">
+          <div className="w-24 h-24 bg-[var(--color-workspace-secondary)]/50 rounded-full flex items-center justify-center shrink-0 border-4 border-[var(--color-border)]">
+            <User className="w-10 h-10 text-[var(--color-text-secondary)]" />
           </div>
           
           <div className="flex-1 text-center sm:text-left">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-1 justify-center sm:justify-start">
-              <h2 className="text-2xl font-bold text-[#53041B]">{dashboardData.name}</h2>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center gap-1 w-fit mx-auto sm:mx-0">
+              <h2 className="text-2xl font-bold text-[var(--color-navy)]">{dashboardData.name}</h2>
+              <span className="px-3 py-1 bg-[var(--color-workspace-secondary)] text-[var(--color-blue)] text-xs font-bold rounded-full flex items-center gap-1 w-fit mx-auto sm:mx-0">
                 <Award className="w-3 h-3" /> Stored in SQLite (Port 5001)
               </span>
             </div>
-            <p className="text-[#770429] font-medium mb-4">{dashboardData.title}</p>
+            <p className="text-[var(--color-text-secondary)] font-medium mb-4">{dashboardData.title}</p>
             
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-[#BB2649] uppercase tracking-wider">Extracted Skills</p>
+              <p className="text-xs font-semibold text-[var(--color-blue)] tracking-wide">Extracted Skills</p>
               <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                 {dashboardData.skills.map(skill => (
-                  <span key={skill} className="px-3 py-1.5 bg-[#FDF0F4]/60 text-[#53041B] text-sm font-semibold rounded-lg border border-[#C92D68]/30">
+                  <span key={skill} className="px-3 py-1.5 bg-[var(--color-workspace-secondary)]/60 text-[var(--color-navy)] text-sm font-semibold rounded-lg border border-[var(--color-border)]/30">
                     {skill}
                   </span>
                 ))}
@@ -290,22 +291,22 @@ export default function Dashboard() {
         </div>
 
         {/* Right: Readiness Score (Circular Progress) */}
-        <div className="bg-gradient-to-br from-[#53041B] to-[#770429] p-6 rounded-2xl shadow-md text-center flex flex-col justify-center items-center text-[#FDF0F4] relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+        <div className="bg-[var(--color-navy-secondary)]  p-6 rounded-[var(--radius-panel)] shadow-[var(--shadow-panel)] text-center flex flex-col justify-center items-center text-[var(--color-surface)] relative overflow-hidden">
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-[var(--color-surface)]/10 rounded-full hidden"></div>
           
-          <h3 className="text-lg font-bold mb-4 tracking-wide text-white">Overall Readiness</h3>
+          <h3 className="text-lg font-bold mb-4 tracking-wide text-[var(--color-surface)]">Overall Readiness</h3>
           
           <div className="relative w-36 h-36 flex items-center justify-center">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
               <path 
-                className="text-white/20" 
+                className="text-[var(--color-surface)]/20"
                 strokeWidth="3.5" 
                 stroke="currentColor" 
                 fill="none" 
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
               />
               <path 
-                className="text-[#F8D8E3]" 
+                className="text-[var(--color-surface)]"
                 strokeDasharray={`${dashboardData.readinessScore}, 100`} 
                 strokeWidth="3.5" 
                 strokeLinecap="round" 
@@ -315,11 +316,11 @@ export default function Dashboard() {
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center flex-col">
-              <span className="text-4xl font-extrabold text-white">{dashboardData.readinessScore}<span className="text-xl text-[#F8D8E3]">%</span></span>
+              <span className="text-4xl font-semibold text-[var(--color-surface)]">{dashboardData.readinessScore}<span className="text-xl text-[var(--color-surface)]">%</span></span>
             </div>
           </div>
           
-          <p className="text-sm mt-4 font-medium text-[#F8D8E3] flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-full">
+          <p className="text-sm mt-4 font-medium text-[var(--color-surface)] flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-full">
             <TrendingUp className="w-4 h-4" /> Estimated role compatibility
           </p>
         </div>
@@ -328,13 +329,13 @@ export default function Dashboard() {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className={`bg-white p-6 rounded-2xl border ${stat.border} shadow-sm flex flex-col hover:-translate-y-1 transition-transform duration-300`}>
-            <div className={`w-12 h-12 ${stat.bg} rounded-xl flex items-center justify-center mb-4`}>
+          <div key={i} className={`bg-[var(--color-surface)] p-6 rounded-[var(--radius-panel)] border ${stat.border} shadow-sm flex flex-col hover:-translate-y-1 transition-transform duration-300`}>
+            <div className={`w-12 h-12 ${stat.bg} rounded-[var(--radius-panel)] flex items-center justify-center mb-4`}>
               <stat.icon className={`w-6 h-6 ${stat.color}`} />
             </div>
-            <h4 className="text-[#770429] font-medium mb-1">{stat.title}</h4>
-            <div className="text-3xl font-bold text-[#53041B] mb-2">{stat.value}</div>
-            <p className="text-sm text-gray-500">{stat.subtitle}</p>
+            <h4 className="text-[var(--color-text-secondary)] font-medium mb-1">{stat.title}</h4>
+            <div className="text-3xl font-bold text-[var(--color-navy)] mb-2">{stat.value}</div>
+            <p className="text-sm text-[var(--color-text-muted)]">{stat.subtitle}</p>
           </div>
         ))}
       </div>
@@ -343,13 +344,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Larger Interactive Skill Radar Chart Card */}
-        <div className="bg-white p-6 rounded-2xl border border-[#C92D68]/40 shadow-sm space-y-4">
-          <div className="border-b border-gray-100 pb-4 flex items-center justify-between">
+        <div className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-panel)] border border-[var(--color-border)]/40 shadow-sm space-y-4">
+          <div className="border-b border-[var(--color-border)] pb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-[#53041B]">Skill Competency Radar</h3>
-              <p className="text-sm text-gray-500">Interactive multi-axis vector mapping.</p>
+              <h3 className="text-xl font-bold text-[var(--color-navy)]">Skill Competency Radar</h3>
+              <p className="text-sm text-[var(--color-text-muted)]">Interactive multi-axis vector mapping.</p>
             </div>
-            <div className="bg-[#FDF0F4] text-[#770429] p-2 rounded-xl border border-[#C92D68]/30">
+            <div className="bg-[var(--color-workspace-secondary)] text-[var(--color-text-secondary)] p-2 rounded-[var(--radius-panel)] border border-[var(--color-border)]/30">
               <Radar className="w-5 h-5" />
             </div>
           </div>
@@ -358,22 +359,22 @@ export default function Dashboard() {
         </div>
 
         {/* Evidence Source Breakdown */}
-        <div className="bg-white p-6 rounded-2xl border border-[#C92D68]/40 shadow-sm space-y-6">
-          <div className="border-b border-gray-100 pb-4">
-            <h3 className="text-xl font-bold text-[#53041B]">Evidence Source Breakdown</h3>
-            <p className="text-sm text-gray-500">Distribution of verified claims across connected platforms.</p>
+        <div className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-panel)] border border-[var(--color-border)]/40 shadow-sm space-y-6">
+          <div className="border-b border-[var(--color-border)] pb-4">
+            <h3 className="text-xl font-bold text-[var(--color-navy)]">Evidence Source Breakdown</h3>
+            <p className="text-sm text-[var(--color-text-muted)]">Distribution of verified claims across connected platforms.</p>
           </div>
 
           <div className="space-y-4 pt-4">
             {dashboardData.platformBreakdown.map((platform, idx) => (
               <div key={idx} className="space-y-2">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="font-semibold text-gray-800 flex items-center gap-2">
-                    <platform.icon className="w-4 h-4 text-[#770429]" /> {platform.name}
+                  <span className="font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
+                    <platform.icon className="w-4 h-4 text-[var(--color-text-secondary)]" /> {platform.name}
                   </span>
-                  <span className="font-bold text-[#53041B]">{platform.count} Claims ({platform.percentage}%)</span>
+                  <span className="font-bold text-[var(--color-navy)]">{platform.count} Claims ({platform.percentage}%)</span>
                 </div>
-                <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                <div className="w-full bg-[var(--color-surface)] h-3 rounded-full overflow-hidden">
                   <div className={`h-full ${platform.color} rounded-full transition-all duration-1000`} style={{ width: `${platform.percentage}%` }}></div>
                 </div>
               </div>
@@ -384,29 +385,29 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Live Verification Feed */}
-      <div className="bg-white p-6 rounded-2xl border border-[#C92D68]/40 shadow-sm space-y-6">
-        <div className="border-b border-gray-100 pb-4 flex items-center justify-between">
+      <div className="bg-[var(--color-surface)] p-6 rounded-[var(--radius-panel)] border border-[var(--color-border)]/40 shadow-sm space-y-6">
+        <div className="border-b border-[var(--color-border)] pb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-bold text-[#53041B]">Live Verification Activity</h3>
-            <p className="text-sm text-gray-500">Saved results from the latest candidate.</p>
+            <h3 className="text-xl font-bold text-[var(--color-navy)]">Live Verification Activity</h3>
+            <p className="text-sm text-[var(--color-text-muted)]">Saved results from the latest candidate.</p>
           </div>
-          <div className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 border border-green-200">
+          <div className="bg-[var(--color-workspace-secondary)] text-[var(--color-blue)] px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 border border-[var(--color-border)]">
             <Activity className="w-3.5 h-3.5 animate-pulse" /> Stored Results
           </div>
         </div>
 
         <div className="space-y-3">
           {dashboardData.recentLogs.map((log, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3.5 rounded-xl bg-gray-50 border border-gray-100 text-sm">
+            <div key={idx} className="flex items-center justify-between p-3.5 rounded-[var(--radius-panel)] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm">
               <div className="space-y-0.5">
-                <p className="font-semibold text-gray-900">{log.action}</p>
-                <p className="text-xs text-gray-500 font-mono">{log.target}</p>
+                <p className="font-semibold text-[var(--color-text-primary)]">{log.action}</p>
+                <p className="text-xs text-[var(--color-text-muted)] font-mono">{log.target}</p>
               </div>
               <div className="text-right space-y-1">
-                <span className="inline-block px-2.5 py-0.5 bg-green-100 text-green-700 text-[11px] font-bold rounded-full">
+                <span className="inline-block px-2.5 py-0.5 bg-[var(--color-workspace-secondary)] text-[var(--color-blue)] text-[11px] font-bold rounded-full">
                   {log.status}
                 </span>
-                <p className="text-[11px] text-gray-400">{log.time}</p>
+                <p className="text-[11px] text-[var(--color-text-muted)]">{log.time}</p>
               </div>
             </div>
           ))}
