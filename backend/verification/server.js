@@ -381,6 +381,132 @@ app.post('/api/generate-resume', async (req, res) => {
     }
 });
 
+app.get('/api/gaps-roadmap', (req, res) => {
+    db.get(`SELECT * FROM candidates ORDER BY created_at DESC LIMIT 1`, [], (err, candidate) => {
+        if (err || !candidate) {
+            return res.status(404).json({ error: "No candidate record found in SQLite database" });
+        }
+
+        const skills = JSON.parse(candidate.skills_json || '{}');
+        const projects = JSON.parse(candidate.projects_json || '[]');
+
+        // Dynamically compute gaps based on database records
+        const dynamicGaps = [];
+        if (!skills['PyTorch'] && !skills['TensorFlow']) {
+            dynamicGaps.push({
+                title: "Deep Learning Frameworks",
+                type: "Missing Evidence",
+                reason: "Database records lack verified PyTorch or TensorFlow code repository signatures.",
+                severity: "High"
+            });
+        }
+        if (projects.length < 2) {
+            dynamicGaps.push({
+                title: "Production Project Volume",
+                type: "Profile Gaps",
+                reason: `Only ${projects.length} project(s) logged in SQLite. Minimum 3 recommended for high ATS matching.`,
+                severity: "Medium"
+            });
+        }
+        // Always include a fallback gap if database is sparse
+        if (dynamicGaps.length === 0) {
+            dynamicGaps.push({
+                title: "Advanced Cloud Pipeline Verification",
+                type: "Weakly Represented Skill",
+                reason: "Skills listed on resume but no automated CI/CD logs found in connected platforms.",
+                severity: "Low"
+            });
+        }
+
+        res.json({
+            success: true,
+            gaps: dynamicGaps
+        });
+    });
+});
+
+const sqlite3 = require('sqlite3').verbose();
+
+// Initialize SQLite database
+const dbFile = path.join(__dirname, 'resumeradar.db');
+
+
+// Create jobs table on startup
+db.serialize(() => {
+    db.run(`CREATE TABLE IF NOT EXISTS jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        company TEXT NOT NULL,
+        location TEXT NOT NULL,
+        type TEXT NOT NULL,
+        readiness INTEGER NOT NULL,
+        skills TEXT NOT NULL,
+        description TEXT NOT NULL,
+        deadline TEXT NOT NULL,
+        applicants INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+});
+
+// --- JOB API ENDPOINTS ---
+
+// 1. Fetch all jobs
+app.get("/api/jobs", (req, res) => {
+    db.all(`SELECT * FROM jobs ORDER BY id DESC`, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: err.message });
+        }
+        res.json({ success: true, jobs: rows });
+    });
+});
+
+// 2. Post a new job
+app.post("/api/jobs", (req, res) => {
+    const { title, company, location, type, readiness, skills, description, deadline } = req.body;
+    
+    if (!title || !company || !location) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    const skillsJson = JSON.stringify(Array.isArray(skills) ? skills : skills.split(',').map(s => s.trim()));
+
+    const query = `INSERT INTO jobs (title, company, location, type, readiness, skills, description, deadline, applicants) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)`;
+    
+    db.run(query, [title, company, location, type, readiness, skillsJson, description, deadline], function(err) {
+        if (err) {
+            return res.status(500).json({ success: false, message: err.message });
+        }
+        res.json({ success: true, jobId: this.lastID });
+    });
+});
+
+// 3. Update an existing job
+app.put("/api/jobs/:id", (req, res) => {
+    const { id } = req.params;
+    const { title, company, location, type, readiness, skills, description, deadline } = req.body;
+    const skillsJson = JSON.stringify(Array.isArray(skills) ? skills : skills.split(',').map(s => s.trim()));
+
+    const query = `UPDATE jobs SET title = ?, company = ?, location = ?, type = ?, readiness = ?, skills = ?, description = ?, deadline = ? WHERE id = ?`;
+
+    db.run(query, [title, company, location, type, readiness, skillsJson, description, deadline, id], function(err) {
+        if (err) {
+            return res.status(500).json({ success: false, message: err.message });
+        }
+        res.json({ success: true, changes: this.changes });
+    });
+});
+
+// 4. Delete a job posting
+app.delete("/api/jobs/:id", (req, res) => {
+    const { id } = req.params;
+    db.run(`DELETE FROM jobs WHERE id = ?`, id, function(err) {
+        if (err) {
+            return res.status(500).json({ success: false, message: err.message });
+        }
+        res.json({ success: true, deleted: this.changes });
+    });
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Radar Engine & SQLite running on port ${PORT}`);

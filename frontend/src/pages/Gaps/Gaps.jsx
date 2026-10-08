@@ -22,19 +22,9 @@ export default function Gaps() {
       { step: 3, title: 'Computer Vision Pipelines', skill: 'OpenCV & MediaPipe', desc: 'Extract facial landmarks, process video streams, and map coordinates.', time: '1 Week', impact: 'Core Competency', details: { objective: 'Build real-time computer vision interactive trackers.', codeSnippet: 'mp_face = mp.solutions.face_mesh\nface_mesh = mp_face.FaceMesh()', tasks: ['Configure landmark detection models', 'Handle frame buffer processing optimization', 'Map visual coordinates to screen space'] } },
       { step: 4, title: 'Physics-Informed Neural Networks', skill: 'PDE Loss Constraints', desc: 'Incorporate physical conservation laws directly into deep learning losses.', time: '1 Week', impact: 'Research Grade', details: { objective: 'Constrain deep learning predictions using physical differential equations.', codeSnippet: 'loss = data_loss + lambda_weight * pde_residual_loss', tasks: ['Formulate water balance equations', 'Design custom loss gradient penalties', 'Publish reproducible research notebooks'] } }
     ],
-    'Frontend Developer': {
-      'step': 1,
-      'title': 'Advanced React & Custom Hooks',
-      'skill': 'React Hooks & State Management',
-      'desc': 'Build reusable custom hooks, context controllers, and memoized components.',
-      'time': '5 Days',
-      'impact': 'Core Competency',
-      'details': {
-        'objective': 'Architect clean, modular user interface components.',
-        'codeSnippet': 'function useDebounce(value, delay) { /* hook logic */ }',
-        'tasks': ['Master useMemo and useCallback optimization', 'Build custom data-fetching hooks', 'Manage complex state architectures']
-      }
-    }
+    'Frontend Developer': [
+      { step: 1, title: 'Advanced React & Custom Hooks', skill: 'React Hooks & State Management', desc: 'Build reusable custom hooks, context controllers, and memoized components.', time: '5 Days', impact: 'Core Competency', details: { objective: 'Architect clean, modular user interface components.', codeSnippet: 'function useDebounce(value, delay) { /* hook logic */ }', tasks: ['Master useMemo and useCallback optimization', 'Build custom data-fetching hooks', 'Manage complex state architectures'] } },
+    ]
   };
 
   const milestones = roleRoadmaps[selectedRole] || roleRoadmaps['Full Stack Engineer'];
@@ -46,10 +36,24 @@ export default function Gaps() {
         const res = await fetch('http://localhost:5001/api/gaps-roadmap');
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load gaps');
-        setGaps(data.gaps || []);
+        
+        // Map backend database gaps format to UI schema safely
+        const dbGaps = (data.gaps || []).map((gap, idx) => ({
+          id: idx + 1,
+          skill: gap.title || gap.skill || "Core Competency",
+          issue: gap.reason || gap.issue || "Unsupported resume claim detected.",
+          whyMissing: gap.reason || "Database records lack automated platform verification signatures.",
+          severity: gap.severity || "High"
+        }));
+
+        setGaps(dbGaps);
       } catch (err) {
         console.error("Failed to fetch database gaps:", err);
         setError(err.message);
+        // Resilient fallback if backend query fails
+        setGaps([
+          { id: 1, skill: "Database Telemetry Audit", issue: "Unable to reach SQLite verification logs.", whyMissing: "Ensure your backend server is running on port 5001.", severity: "High" }
+        ]);
       } finally {
         setLoading(false);
       }
@@ -76,7 +80,7 @@ export default function Gaps() {
       </div>
 
       {/* Role Selection Tabs for Customized Learning */}
-      {error && <p role="alert" className="text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-red-600 text-xs font-semibold px-2">{error}</p>}
       <div className="bg-white rounded-2xl border border-[#C92D68]/30 shadow-sm p-6 space-y-4">
         <div className="flex items-center gap-3">
           <div className="bg-[#F8D8E3]/60 p-2.5 rounded-xl">
@@ -93,7 +97,7 @@ export default function Gaps() {
             <button
               key={role}
               onClick={() => setSelectedRole(role)}
-              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm ${
+              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm cursor-pointer ${
                 selectedRole === role
                   ? 'bg-[#53041B] text-white shadow-md scale-105'
                   : 'bg-gray-100 hover:bg-[#FDF0F4] text-gray-700 hover:text-[#53041B] border border-gray-200'
@@ -118,7 +122,7 @@ export default function Gaps() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {!error && gaps.length === 0 && <p>No stored evidence gaps. Upload and verify a profile if you have not already.</p>}
+          {gaps.length === 0 && <p className="text-sm text-gray-500">No stored evidence gaps found in SQLite database.</p>}
           {gaps.map((gap) => {
             const isHigh = gap.severity === 'High';
             return (
@@ -146,7 +150,7 @@ export default function Gaps() {
         </div>
       </div>
 
-      {/* CURVED ROAD MAP SECTION (Light Background with Winding Path Look) */}
+      {/* CURVED ROAD MAP SECTION */}
       <div className="bg-[#FDFBF7] rounded-3xl border border-[#C92D68]/30 shadow-lg p-6 sm:p-12 relative overflow-hidden">
         
         <div className="absolute top-0 right-0 -mt-16 -mr-16 w-96 h-96 bg-[#F8D8E3]/50 rounded-full blur-3xl pointer-events-none"></div>
@@ -162,7 +166,6 @@ export default function Gaps() {
         {/* Curved Road Container with SVG Winding Line */}
         <div className="relative z-10 max-w-3xl mx-auto py-6">
           
-          {/* SVG Winding Road Path in Background */}
           <div className="absolute inset-0 flex justify-center pointer-events-none">
             <svg className="w-full h-full" viewBox="0 0 400 800" fill="none" preserveAspectRatio="none">
               <path 
@@ -180,7 +183,6 @@ export default function Gaps() {
             </svg>
           </div>
 
-          {/* Staggered Milestone Nodes */}
           <div className="space-y-16 relative z-10">
             {currentMilestones.map((milestone, index) => {
               const isEven = index % 2 === 0;
@@ -190,7 +192,6 @@ export default function Gaps() {
                   onClick={() => setSelectedMilestone(milestone)}
                   className={`flex flex-col sm:flex-row items-center gap-6 ${isEven ? 'sm:flex-row-reverse' : ''} group cursor-pointer`}
                 >
-                  {/* Card Content Box */}
                   <div className="w-full sm:w-[calc(50%-40px)] bg-white border border-[#C92D68]/30 rounded-2xl p-6 shadow-md hover:shadow-xl hover:border-[#BB2649] transition-all group-hover:-translate-y-1">
                     <div className="flex items-center justify-between mb-3">
                       <span className="px-3 py-1 bg-[#FDF0F4] text-[#770429] text-xs font-bold rounded-full border border-[#C92D68]/20">
@@ -209,12 +210,10 @@ export default function Gaps() {
                     </div>
                   </div>
 
-                  {/* Centered Node Marker on Road */}
                   <div className="w-14 h-14 bg-[#53041B] text-[#F8D8E3] rounded-full border-4 border-[#FDFBF7] shadow-xl flex items-center justify-center font-black text-lg shrink-0 group-hover:scale-110 group-hover:bg-[#BB2649] transition-transform">
                     0{milestone.step}
                   </div>
 
-                  {/* Spacer for alternating layout on desktop */}
                   <div className="hidden sm:block sm:w-[calc(50%-40px)]"></div>
                 </div>
               );
@@ -231,7 +230,7 @@ export default function Gaps() {
             
             <button 
               onClick={() => setSelectedMilestone(null)}
-              className="absolute top-6 right-6 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+              className="absolute top-6 right-6 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -279,7 +278,7 @@ export default function Gaps() {
             <div className="pt-2">
               <button 
                 onClick={() => setSelectedMilestone(null)}
-                className="w-full py-3 bg-[#53041B] hover:bg-[#770429] text-white font-bold rounded-xl transition-colors shadow-md text-sm"
+                className="w-full py-3 bg-[#53041B] hover:bg-[#770429] text-white font-bold rounded-xl transition-colors shadow-md text-sm cursor-pointer"
               >
                 Got It, Let's Master This
               </button>
