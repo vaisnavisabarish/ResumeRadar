@@ -1,108 +1,181 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileSearch, ShieldAlert, Target, Menu, UploadCloud, AlertCircle, Globe } from 'lucide-react';
+import { LayoutDashboard, FileSearch, ShieldAlert, Target, Menu, UploadCloud, AlertCircle, Globe, Radar, PanelLeftClose, PanelLeftOpen, ChevronRight, X } from 'lucide-react';
+
+const navGroups = [
+  { name: 'Overview', items: [
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  ] },
+  { name: 'Profile', items: [
+    { name: 'Upload', path: '/dashboard/upload', icon: UploadCloud },
+    { name: 'Evidence', path: '/dashboard/evidence', icon: FileSearch },
+    { name: 'Digital Footprint', path: '/dashboard/digital-footprint', icon: Globe },
+  ] },
+  { name: 'Intelligence', items: [
+    { name: 'Career Gaps', path: '/dashboard/career-gaps', icon: AlertCircle },
+    { name: 'Role Analyzer', path: '/dashboard/role-analyzer', icon: Target },
+  ] },
+  { name: 'Action', items: [
+    { name: 'Gaps & Roadmap', path: '/dashboard/gaps', icon: ShieldAlert },
+    { name: 'Resume Improver', path: '/dashboard/resume-improver', icon: Target },
+  ] },
+];
+
+function Brand() {
+  return (
+    <div className="candidate-brand">
+      <Radar size={24} className="candidate-brand-icon" aria-hidden="true" />
+      <span className="candidate-brand-name">Resume<span className="candidate-brand-accent">Radar</span></span>
+    </div>
+  );
+}
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const sidebarRef = useRef(null);
+  const mobileToggleRef = useRef(null);
+  const mobileCloseRef = useRef(null);
+  const desktopToggleRef = useRef(null);
 
-  // Updated purely Magenta/Peach Palette (No Black)
-  const colors = {
-    darkMagenta: '#53041B',    // Main sidebar background
-    vibrantMagenta: '#770429', // Borders, hover states, and gradients
-    brightPink: '#BB2649',     // Small pops of color/accents
-    peachCream: '#F8D8E3',     // Active text and icon highlights
-    almond: '#FDF0F4',         // Standard text color
-  };
+  useEffect(() => {
+    if (!isMobileOpen) return;
 
-  const navItems = [
-    { name: 'Upload Profile', path: '/dashboard/upload', icon: UploadCloud },
-    { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Evidence', path: '/dashboard/evidence', icon: FileSearch },
-    { name: 'Gaps & Roadmap', path: '/dashboard/gaps', icon: ShieldAlert },
-    { name: 'Career Gaps', path: '/dashboard/career-gaps', icon: AlertCircle },
-    { name: 'Digital Footprint', path: '/dashboard/digital-footprint', icon: Globe },
-    { name: 'Role Analyzer', path: '/dashboard/role-analyzer', icon: Target },
-    { name: 'Resume Improver', path: '/dashboard/resume-improver', icon: Target },
-  ];
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
+    const mobileToggle = mobileToggleRef.current;
+    const desktopToggle = desktopToggleRef.current;
+    mobileCloseRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsMobileOpen(false);
+      }
+      if (event.key !== 'Tab') return;
+
+      const controls = [...sidebarRef.current.querySelectorAll('a[href], button:not([disabled])')]
+        .filter((control) => control.getClientRects().length > 0);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !sidebarRef.current.contains(active))) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && (active === last || !sidebarRef.current.contains(active))) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+
+    const handleResize = (event) => {
+      if (!event.matches) setIsMobileOpen(false);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    mobileQuery.addEventListener('change', handleResize);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      mobileQuery.removeEventListener('change', handleResize);
+      const toggle = mobileQuery.matches ? mobileToggle : desktopToggle;
+      if (toggle?.isConnected) toggle.focus();
+    };
+  }, [isMobileOpen]);
 
   return (
-    <div 
-      style={{ backgroundColor: colors.darkMagenta }}
-      className={`border-r border-[#770429] flex flex-col transition-all duration-300 ease-in-out h-screen text-[#FDF0F4] ${
-        isExpanded ? 'w-64' : 'w-20'
-      }`}
-    >
-      {/* Header & Toggle Button */}
-      <div 
-        style={{ borderColor: colors.vibrantMagenta }}
-        className={`flex items-center h-16 border-b ${isExpanded ? 'px-6 justify-between' : 'px-0 justify-center'}`}
-      >
-        {isExpanded && (
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: colors.brightPink }}></div>
-            <h1 
-              style={{ color: colors.almond }}
-              className="text-xl font-extrabold tracking-wide whitespace-nowrap overflow-hidden transition-all duration-300"
-            >
-              Resume<span style={{ color: colors.peachCream }}>Radar</span>
-            </h1>
-          </div>
-        )}
-        <button 
-          onClick={() => setIsExpanded(!isExpanded)}
-          style={{ color: colors.peachCream }}
-          className="p-2 rounded-lg hover:bg-[#770429] transition-colors cursor-pointer"
-          title="Toggle Sidebar"
-        >
-          <Menu className="w-6 h-6 shrink-0" />
-        </button>
-      </div>
-      
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-2.5 overflow-y-auto overflow-x-hidden">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.path}
-            end={item.path === '/dashboard'}
-            title={!isExpanded ? item.name : ''}
-            style={({ isActive }) => ({
-              backgroundColor: isActive ? colors.peachCream : 'transparent',
-              color: isActive ? colors.darkMagenta : colors.almond,
-            })}
-            className={({ isActive }) =>
-              `flex items-center p-3 rounded-xl transition-all duration-200 font-medium ${
-                isActive
-                  ? 'shadow-md shadow-[#53041B]/50 transform scale-[1.01]'
-                  : 'hover:bg-[#770429] hover:text-white'
-              } ${isExpanded ? 'gap-3 justify-start px-4' : 'justify-center'}`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <item.icon 
-                  style={{ color: isActive ? colors.darkMagenta : colors.peachCream }} 
-                  className="w-5 h-5 shrink-0 transition-colors" 
-                />
-                {isExpanded && (
-                  <span className="whitespace-nowrap transition-opacity">
-                    {item.name}
-                  </span>
-                )}
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
+    <>
+      <a className="candidate-skip-link" href="#candidate-content">Skip to content</a>
 
-      {/* Decorative Accent at Footer */}
-      {isExpanded && (
-        <div className="p-4 border-t border-[#770429] text-center">
-          <p className="text-xs tracking-wider" style={{ color: `${colors.peachCream}90` }}>
-            POWERED BY <span className="font-semibold" style={{ color: colors.brightPink }}>DATAQUEST 3.0</span>
-          </p>
-        </div>
+      <header className="candidate-mobile-header">
+        <Brand />
+        <button
+          ref={mobileToggleRef}
+          type="button"
+          className="candidate-icon-button"
+          onClick={() => setIsMobileOpen(true)}
+          aria-label="Open navigation"
+          aria-expanded={isMobileOpen}
+          aria-controls="candidate-navigation"
+        >
+          <Menu size={22} aria-hidden="true" />
+        </button>
+      </header>
+
+      {isMobileOpen && (
+        <button
+          type="button"
+          className="candidate-nav-backdrop"
+          onClick={() => setIsMobileOpen(false)}
+          aria-label="Close navigation"
+          tabIndex={-1}
+        />
       )}
-    </div>
+
+      <aside
+        ref={sidebarRef}
+        className={`candidate-sidebar${isExpanded ? '' : ' is-collapsed'}${isMobileOpen ? ' is-mobile-open' : ''}`}
+        role={isMobileOpen ? 'dialog' : undefined}
+        aria-modal={isMobileOpen ? true : undefined}
+        aria-label="Candidate navigation"
+      >
+        <div className="candidate-sidebar-header">
+          <Brand />
+          <button
+            ref={desktopToggleRef}
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="candidate-icon-button candidate-desktop-toggle"
+            aria-label={isExpanded ? 'Collapse navigation' : 'Expand navigation'}
+            aria-expanded={isExpanded}
+            aria-controls="candidate-navigation"
+            title={isExpanded ? 'Collapse navigation' : 'Expand navigation'}
+          >
+            {isExpanded ? <PanelLeftClose size={20} aria-hidden="true" /> : <PanelLeftOpen size={20} aria-hidden="true" />}
+          </button>
+          <button
+            ref={mobileCloseRef}
+            type="button"
+            onClick={() => setIsMobileOpen(false)}
+            className="candidate-icon-button candidate-mobile-close"
+            aria-label="Close navigation"
+          >
+            <X size={22} aria-hidden="true" />
+          </button>
+        </div>
+
+        <nav id="candidate-navigation" className="candidate-navigation" aria-label="Candidate">
+          {navGroups.map((group) => (
+            <section key={group.name} className="candidate-nav-group" aria-label={group.name}>
+              <h2 className="candidate-nav-heading">{group.name}</h2>
+              <ul className="candidate-nav-list">
+                {group.items.map((item) => (
+                  <li key={item.path}>
+                    <NavLink
+                      to={item.path}
+                      end={item.path === '/dashboard'}
+                      title={item.name}
+                      aria-label={item.name}
+                      onClick={() => setIsMobileOpen(false)}
+                      className={({ isActive }) => `candidate-nav-link${isActive ? ' is-active' : ''}`}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <item.icon size={20} className="candidate-nav-icon" aria-hidden="true" />
+                          <span className="candidate-nav-label">{item.name}</span>
+                          {isActive && <ChevronRight size={16} className="candidate-nav-active-marker" aria-hidden="true" />}
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </nav>
+
+        <footer className="candidate-sidebar-footer">
+          Powered by <span>DATAQUEST 3.0</span>
+        </footer>
+      </aside>
+    </>
   );
 }
