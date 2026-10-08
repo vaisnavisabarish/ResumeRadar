@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileSearch, ShieldAlert, Target, Menu, UploadCloud, AlertCircle, Globe, Radar, PanelLeftClose, PanelLeftOpen, ChevronRight, X } from 'lucide-react';
+import { LayoutDashboard, FileSearch, ShieldAlert, Target, Menu, UploadCloud, Radar, PanelLeftClose, PanelLeftOpen, ChevronRight, X } from 'lucide-react';
 
 const navGroups = [
   { name: 'Overview', items: [
@@ -9,10 +9,8 @@ const navGroups = [
   { name: 'Profile', items: [
     { name: 'Upload', path: '/dashboard/upload', icon: UploadCloud },
     { name: 'Evidence', path: '/dashboard/evidence', icon: FileSearch },
-    { name: 'Digital Footprint', path: '/dashboard/digital-footprint', icon: Globe },
   ] },
   { name: 'Intelligence', items: [
-    { name: 'Career Gaps', path: '/dashboard/career-gaps', icon: AlertCircle },
     { name: 'Role Analyzer', path: '/dashboard/role-analyzer', icon: Target },
   ] },
   { name: 'Action', items: [

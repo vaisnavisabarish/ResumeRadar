@@ -280,8 +280,8 @@ function extractExperience(text) {
 function extractResearch(text) {
 
     const match = text.match(
-        /PUBLICATIONS([\s\S]*?)(CERTIFICATIONS|ACHIEVEMENTS|PROJECTS|EXPERIENCE|$)/i
-    );
+/(PUBLICATIONS?|RESEARCH(?:\s+PAPERS)?|RESEARCH\s+WORK|RESEARCH\s+EXPERIENCE)([\s\S]*?)(CERTIFICATIONS|ACHIEVEMENTS|PROJECTS|EXPERIENCE|EDUCATION|SKILLS|$)/i
+);
 
 
     if (!match) {
