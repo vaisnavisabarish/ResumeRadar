@@ -8,8 +8,6 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Evidence from './pages/Evidence/Evidence';
 import Gaps from './pages/Gaps/Gaps';
 import RoleAnalyzer from './pages/RoleAnalyzer/RoleAnalyzer';
-import CareerGaps from './pages/CareerGaps/Career';
-import DigitalFootprint from './pages/Footprint/Footprint';
 import RecruiterDashboard from './pages/RecruiterDashboard/RecruiterDashboard'; // Create or link your recruiter dashboard here
 import ResumeImprover from './pages/ResumeImprover/ResumeImprover'; // Create or link your resume improver page here
 import Jobs from './pages/Jobs/Jobs'; // Create or link your jobs page here
@@ -35,8 +33,6 @@ export default function App() {
           <Route path="upload" element={<Upload />} />
           <Route path="evidence" element={<Evidence />} />
           <Route path="gaps" element={<Gaps />} />
-          <Route path="career-gaps" element={<CareerGaps />} />
-          <Route path="digital-footprint" element={<DigitalFootprint />} />
           <Route path="role-analyzer" element={<RoleAnalyzer />} />
           <Route path="resume-improver" element={<ResumeImprover />} />
         </Route>
